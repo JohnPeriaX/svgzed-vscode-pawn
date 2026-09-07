@@ -31,16 +31,6 @@ jobs:
       - name: Build VS Code extension
         run: npx @vscode/vsce package --no-yarn --out pawn-development-${GITHUB_REF_NAME#v}.vsix
 
-      - name: Install tree-sitter CLI
-        run: npm install --global tree-sitter-cli@0.25.10
-
-      - name: Build C grammar
-        run: |
-          git clone https://github.com/tree-sitter/tree-sitter-c.git /tmp/tree-sitter-c`r`n          cd /tmp/tree-sitter-c`r`n          git checkout c9ff62c7ef293ccd6129318f638327dfd6ade7df
-          cd /tmp/tree-sitter-c
-          tree-sitter build --wasm
-          cp tree-sitter-c.wasm "$GITHUB_WORKSPACE/grammars-c.wasm"
-
       - name: Build Zed extension
         run: |
           cargo build --release --target wasm32-wasip2
@@ -48,7 +38,7 @@ jobs:
           cp extension.toml dist/zed-pawn/
           cp languages/pawn/config.toml languages/pawn/highlights.scm languages/pawn/brackets.scm languages/pawn/outline.scm languages/pawn/tasks.json dist/zed-pawn/languages/pawn/
           cp target/wasm32-wasip2/release/zed_pawn.wasm dist/zed-pawn/extension.wasm
-          cp grammars-c.wasm dist/zed-pawn/grammars/c.wasm
+          cp grammars/c.wasm dist/zed-pawn/grammars/c.wasm
           cp LICENSE dist/zed-pawn/LICENSE
           cp README.md dist/zed-pawn/README.md
           cp server/pawn-language-server.js dist/zed-pawn/pawn-language-server.js
