@@ -4,8 +4,14 @@
     "command": "pwsh",
     "args": [
       "-NoProfile",
-      "-Command",
-      "$root=$env:ZED_WORKTREE_ROOT; $pawnJson=Join-Path $root 'pawn.json'; $pawncc=Join-Path $root 'pawno\\pawncc.exe'; $tasksPath=Join-Path $root '.vscode\\tasks.json'; $hasSampctl=Test-Path $pawnJson; $hasPawncc=(Test-Path $pawncc) -and (Test-Path (Join-Path $root 'pawno\\pawndisasm.exe')) -and (Test-Path (Join-Path $root 'pawno\\pawnc.dll')); if($hasSampctl -and $hasPawncc){$choice=Read-Host 'Pawn Build: [1] sampctl  [2] Pawno / PawnCC'; if($choice -eq '1'){sampctl build; exit $LASTEXITCODE}; if($choice -eq '2'){ $src=$env:ZED_FILE; $out=Join-Path $root ('gamemodes\\' + [IO.Path]::GetFileNameWithoutExtension($src) + '.amx'); & $pawncc $src \"-D$(Join-Path $root 'gamemodes')\" \"-i$(Join-Path $root 'pawno\\include')\" \"-o$out\" '-;+' '-(+' '-v2'; exit $LASTEXITCODE}; exit 2}; if($hasSampctl){sampctl build; exit $LASTEXITCODE}; if($hasPawncc){$src=$env:ZED_FILE; $out=Join-Path $root ('gamemodes\\' + [IO.Path]::GetFileNameWithoutExtension($src) + '.amx'); & $pawncc $src \"-D$(Join-Path $root 'gamemodes')\" \"-i$(Join-Path $root 'pawno\\include')\" \"-o$out\" '-;+' '-(+' '-v2'; exit $LASTEXITCODE}; if(Test-Path $tasksPath){Write-Host 'Custom .vscode tasks detected. Run the desired task from Zed Tasks.'; exit 2}; Write-Error 'No Pawn build tool detected.'; exit 1"
+      "-File",
+      "$ZED_WORKTREE_ROOT\\scripts\\pawn-build.ps1",
+      "-WorkspaceRoot",
+      "$ZED_WORKTREE_ROOT",
+      "-SourceFile",
+      "$ZED_FILE",
+      "-Mode",
+      "auto"
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always",
@@ -18,8 +24,14 @@
     "command": "pwsh",
     "args": [
       "-NoProfile",
-      "-Command",
-      "$root=$env:ZED_WORKTREE_ROOT; $pawncc=Join-Path $root 'pawno\\pawncc.exe'; if(-not (Test-Path $pawncc)){Write-Error \"Pawno compiler not found: $pawncc\"; exit 1}; $src=$env:ZED_FILE; $out=Join-Path $root ('gamemodes\\' + [IO.Path]::GetFileNameWithoutExtension($src) + '.amx'); & $pawncc $src \"-D$(Join-Path $root 'gamemodes')\" \"-i$(Join-Path $root 'pawno\\include')\" \"-o$out\" '-;+' '-(+' '-v2'; exit $LASTEXITCODE"
+      "-File",
+      "$ZED_WORKTREE_ROOT\\scripts\\pawn-build.ps1",
+      "-WorkspaceRoot",
+      "$ZED_WORKTREE_ROOT",
+      "-SourceFile",
+      "$ZED_FILE",
+      "-Mode",
+      "pawno"
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always",

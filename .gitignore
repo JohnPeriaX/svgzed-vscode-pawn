@@ -19,7 +19,8 @@ dist/
 node_modules/
 .vscode-test/
 *.vsix
-scripts/
+scripts/*
+!scripts/pawn-build.ps1
 package-lock.json
 snippets/
 test/
