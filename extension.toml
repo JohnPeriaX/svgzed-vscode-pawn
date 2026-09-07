@@ -8,7 +8,7 @@ repository = "https://github.com/openmultiplayer/vscode-pawn"
 
 [grammars.c]
 repository = "https://github.com/tree-sitter/tree-sitter-c"
-commit = "c9ff62c7ef293ccd6129318f638327dfd6ade7df"
+rev = "c9ff62c7ef293ccd6129318f638327dfd6ade7df"
 
 [language_servers.pawn-language-server]
 name = "Pawn Language Server"
