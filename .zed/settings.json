@@ -1,0 +1,24 @@
+{
+  // Zed format (NOT VSCode). NOTE: Zed has no `files.encoding` key.
+  // Legacy CP874/TIS-620 files under `gamemodes/` are auto-detected on open
+  // and preserved on save — do NOT add VSCode keys like `files.encoding`,
+  // `files.autoGuessEncoding`, `[markdown]`, `[json]` here, Zed will ignore them.
+  // Thai bytes in .pwn/.inc are read-only: keep format_on_save OFF (see Bug A in WorkProgress).
+  "file_types": {
+    "Pawn": ["*.pwn", "*.inc", "*.pawn", "*.p"]
+  },
+  "format_on_save": "off",
+  "ensure_final_newline_on_save": false,
+  "remove_trailing_whitespace_on_save": false,
+  "languages": {
+    "Pawn": {
+      "format_on_save": "off",
+      "enable_language_server": false,
+      "remove_trailing_whitespace_on_save": false,
+      "ensure_final_newline_on_save": false
+    },
+    "Markdown": {
+      "format_on_save": "off"
+    }
+  }
+}
