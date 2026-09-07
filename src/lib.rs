@@ -1,6 +1,6 @@
 use zed_extension_api::{self as zed, DownloadedFileType, LanguageServerId, Result};
 
-const SERVER_URL: &str = "https://github.com/JohnPeriaX/svgzed-vscode-pawn/releases/download/v0.1.1/pawn-language-server.js";
+const SERVER_URL: &str = "https://github.com/JohnPeriaX/svgzed-vscode-pawn/releases/download/v0.1.4/pawn-language-server.js";
 const SERVER_FILE: &str = "pawn-language-server.js";
 
 struct PawnExtension;

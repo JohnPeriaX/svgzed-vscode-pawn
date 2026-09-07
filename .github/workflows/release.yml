@@ -15,35 +15,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install Node dependencies
-        run: npm install
-
-      - name: Build VS Code extension
-        run: npx @vscode/vsce package --no-yarn --out pawn-development-${GITHUB_REF_NAME#v}.vsix
-
-      - name: Build Zed extension
-        run: |
-          mkdir -p dist/zed-pawn/languages/pawn dist/zed-pawn/grammars
-          cp extension.toml dist/zed-pawn/
-          cp languages/pawn/config.toml languages/pawn/highlights.scm languages/pawn/brackets.scm languages/pawn/outline.scm languages/pawn/tasks.json dist/zed-pawn/languages/pawn/
-          cp extension.wasm dist/zed-pawn/extension.wasm
-          cp grammars/c.wasm dist/zed-pawn/grammars/c.wasm
-          cp LICENSE dist/zed-pawn/LICENSE
-          cp README.md dist/zed-pawn/README.md
-          cp server/pawn-language-server.js dist/zed-pawn/pawn-language-server.js
-          cd dist
-          zip -r "zed-pawn-${GITHUB_REF_NAME#v}.zip" zed-pawn
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
           files: |
-            pawn-development-${GITHUB_REF_NAME#v}.vsix
-            dist/zed-pawn-${GITHUB_REF_NAME#v}.zip
-            server/pawn-language-server.js
+            release/pawn-development-1.1.5.vsix
+            release/zed-pawn-0.1.4.zip
+            release/pawn-language-server.js
