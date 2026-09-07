@@ -150,6 +150,17 @@
           "type": "boolean",
           "default": "true",
           "description": "enable to view last line of region section when it's collaped, if you select false then only first line will be visible."
+        },
+        "pawn.build.tool": {
+          "type": "string",
+          "default": "auto",
+          "enum": [
+            "auto",
+            "sampctl",
+            "pawno",
+            "custom"
+          ],
+          "description": "Select the Pawn build tool for this workspace."
         }
       }
     },
@@ -202,6 +213,14 @@
       {
         "command": "pawn-development.build",
         "title": "Pawn Development: Build"
+      },
+      {
+        "command": "pawn-development.selectBuildTool",
+        "title": "Pawn Development: Select Build Tool"
+      },
+      {
+        "command": "pawn-development.resetBuildTool",
+        "title": "Pawn Development: Reset Build Tool to Auto"
       }
     ],
     "menus": {

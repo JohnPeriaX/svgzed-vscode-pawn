@@ -1,4 +1,4 @@
-import BuildTaskHandler, { runPawnBuild } from "./buildTask";
+import BuildTaskHandler, { runPawnBuild, selectPawnBuildTool, resetPawnBuildTool } from "./buildTask";
 import PawnDocumentFormattingEditProvider from "./formatter";
 import * as vscode from "vscode";
 import { initSnippetCollector } from "./commonFunc";
@@ -11,6 +11,8 @@ export let client: LanguageClient;
 
 export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(vscode.commands.registerCommand("pawn-development.build", runPawnBuild));
+  context.subscriptions.push(vscode.commands.registerCommand("pawn-development.selectBuildTool", selectPawnBuildTool));
+  context.subscriptions.push(vscode.commands.registerCommand("pawn-development.resetBuildTool", resetPawnBuildTool));
   context.subscriptions.push(vscode.commands.registerCommand("pawn-development.initTask", BuildTaskHandler));
   context.subscriptions.push(vscode.commands.registerCommand("pawn-development.initScanDir", InitPawnIgnore));
   context.subscriptions.push(vscode.commands.registerCommand("pawn-development.pawnignore", addToPawnIgnore));
