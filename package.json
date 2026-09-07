@@ -39,6 +39,7 @@
     "onCommand:pawn-development.initScanDir",
     "onCommand:pawn-development.pawnignore",
     "onCommand:pawn-development.initTask",
+    "onCommand:pawn-development.build",
     "onLanguage:pawn",
     "onLanguage:Pawn"
   ],
@@ -152,6 +153,18 @@
         }
       }
     },
+    "keybindings": [
+      {
+        "command": "pawn-development.build",
+        "key": "f5",
+        "when": "editorTextFocus && editorLangId == pawn"
+      },
+      {
+        "command": "pawn-development.build",
+        "key": "ctrl+shift+b",
+        "when": "editorTextFocus && editorLangId == pawn"
+      }
+    ],
     "problemMatchers": [
       {
         "name": "pawncc",
@@ -185,6 +198,10 @@
       {
         "command": "pawn-development.reloadDefs",
         "title": "Pawn Development: reload definitions"
+      },
+      {
+        "command": "pawn-development.build",
+        "title": "Pawn Development: Build"
       }
     ],
     "menus": {

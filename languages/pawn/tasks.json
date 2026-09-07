@@ -1,26 +1,22 @@
 [
   {
-    "label": "Pawn: Build current file",
+    "label": "Pawn: Build",
+    "command": "sampctl",
+    "args": ["build"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "reveal": "always",
+    "hide": "never",
+    "use_new_terminal": true,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "Pawn: Build with pawncc",
     "command": "pawncc",
-    "args": ["$ZED_FILE", "-;+", "-(+", "-d3"],
-    "tags": ["pawn-build"]
-  },
-  {
-    "label": "Pawn: Build with sampctl",
-    "command": "sampctl",
-    "args": ["package", "build"],
-    "tags": ["pawn-build"]
-  },
-  {
-    "label": "Pawn: Build sampctl profile dev",
-    "command": "sampctl",
-    "args": ["package", "build", "dev"],
-    "tags": ["pawn-build"]
-  },
-  {
-    "label": "Pawn: Build sampctl profile release",
-    "command": "sampctl",
-    "args": ["package", "build", "release"],
-    "tags": ["pawn-build"]
+    "args": ["$ZED_FILE"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "reveal": "always",
+    "hide": "never",
+    "use_new_terminal": true,
+    "allow_concurrent_runs": false
   }
 ]
