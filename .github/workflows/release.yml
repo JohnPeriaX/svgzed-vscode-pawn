@@ -37,7 +37,7 @@ jobs:
           mkdir -p dist/zed-pawn/languages/pawn dist/zed-pawn/grammars
           cp extension.toml dist/zed-pawn/
           cp languages/pawn/config.toml languages/pawn/highlights.scm languages/pawn/brackets.scm languages/pawn/outline.scm languages/pawn/tasks.json dist/zed-pawn/languages/pawn/
-          cp target/wasm32-wasip2/release/zed_pawn.wasm dist/zed-pawn/extension.wasm
+          cp extension.wasm dist/zed-pawn/extension.wasm
           cp grammars/c.wasm dist/zed-pawn/grammars/c.wasm
           cp LICENSE dist/zed-pawn/LICENSE
           cp README.md dist/zed-pawn/README.md
