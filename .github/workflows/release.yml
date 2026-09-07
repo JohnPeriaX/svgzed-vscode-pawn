@@ -1,0 +1,65 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-wasip2
+
+      - name: Install Node dependencies
+        run: npm install
+
+      - name: Build VS Code extension
+        run: npx @vscode/vsce package --no-yarn --out pawn-development-${GITHUB_REF_NAME#v}.vsix
+
+      - name: Install tree-sitter CLI
+        run: npm install --global tree-sitter-cli@0.25.10
+
+      - name: Build C grammar
+        run: |
+          git clone https://github.com/tree-sitter/tree-sitter-c.git /tmp/tree-sitter-c`r`n          cd /tmp/tree-sitter-c`r`n          git checkout c9ff62c7ef293ccd6129318f638327dfd6ade7df
+          cd /tmp/tree-sitter-c
+          tree-sitter build --wasm
+          cp tree-sitter-c.wasm "$GITHUB_WORKSPACE/grammars-c.wasm"
+
+      - name: Build Zed extension
+        run: |
+          cargo build --release --target wasm32-wasip2
+          mkdir -p dist/zed-pawn/languages/pawn dist/zed-pawn/grammars
+          cp extension.toml dist/zed-pawn/
+          cp languages/pawn/config.toml languages/pawn/highlights.scm languages/pawn/brackets.scm languages/pawn/outline.scm languages/pawn/tasks.json dist/zed-pawn/languages/pawn/
+          cp target/wasm32-wasip2/release/zed_pawn.wasm dist/zed-pawn/extension.wasm
+          cp grammars-c.wasm dist/zed-pawn/grammars/c.wasm
+          cp LICENSE dist/zed-pawn/LICENSE
+          cp README.md dist/zed-pawn/README.md
+          cp server/pawn-language-server.js dist/zed-pawn/pawn-language-server.js
+          cd dist
+          zip -r "zed-pawn-${GITHUB_REF_NAME#v}.zip" zed-pawn
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            pawn-development-${GITHUB_REF_NAME#v}.vsix
+            dist/zed-pawn-${GITHUB_REF_NAME#v}.zip
+            server/pawn-language-server.js
