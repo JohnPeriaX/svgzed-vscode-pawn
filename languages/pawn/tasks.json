@@ -1,7 +1,7 @@
 [
   {
     "label": "Pawn: Build",
-    "command": "if (Test-Path \"$ZED_WORKTREE_ROOT\\pawn.json\") { & sampctl build } elseif ((Test-Path \"$ZED_WORKTREE_ROOT\\pawno\\pawncc.exe\") -and (Test-Path \"$ZED_WORKTREE_ROOT\\pawno\\pawndisasm.exe\") -and (Test-Path \"$ZED_WORKTREE_ROOT\\pawno\\pawnc.dll\")) { & \"$ZED_WORKTREE_ROOT\\pawno\\pawncc.exe\" \"$ZED_FILE\" \"-D$ZED_WORKTREE_ROOT\\gamemodes\" \"-i$ZED_WORKTREE_ROOT\\pawno\\include\" \"-o$ZED_WORKTREE_ROOT\\gamemodes\\$ZED_STEM.amx\" \"-;+\" \"-(+\" \"-v2\" } else { Write-Error \"No Pawn build tool detected.\"; exit 1 }",
+    "command": "$ZED_WORKTREE_ROOT\\.vscode\\build-pawncc.bat",
     "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always",
     "hide": "never",
@@ -10,7 +10,7 @@
   },
   {
     "label": "Pawn: Build with pawncc",
-    "command": "if ((Test-Path \"$ZED_WORKTREE_ROOT\\pawno\\pawncc.exe\") -and (Test-Path \"$ZED_WORKTREE_ROOT\\pawno\\pawndisasm.exe\") -and (Test-Path \"$ZED_WORKTREE_ROOT\\pawno\\pawnc.dll\")) { & \"$ZED_WORKTREE_ROOT\\pawno\\pawncc.exe\" \"$ZED_FILE\" \"-D$ZED_WORKTREE_ROOT\\gamemodes\" \"-i$ZED_WORKTREE_ROOT\\pawno\\include\" \"-o$ZED_WORKTREE_ROOT\\gamemodes\\$ZED_STEM.amx\" \"-;+\" \"-(+\" \"-v2\" } else { Write-Error \"Pawno compiler not found in workspace\\pawno.\"; exit 1 }",
+    "command": "$ZED_WORKTREE_ROOT\\.vscode\\build-pawncc.bat",
     "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always",
     "hide": "never",
