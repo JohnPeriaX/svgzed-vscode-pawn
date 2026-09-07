@@ -20,11 +20,6 @@ jobs:
         with:
           node-version: 20
 
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: wasm32-wasip2
-
       - name: Install Node dependencies
         run: npm install
 
@@ -33,7 +28,6 @@ jobs:
 
       - name: Build Zed extension
         run: |
-          cargo build --release --target wasm32-wasip2
           mkdir -p dist/zed-pawn/languages/pawn dist/zed-pawn/grammars
           cp extension.toml dist/zed-pawn/
           cp languages/pawn/config.toml languages/pawn/highlights.scm languages/pawn/brackets.scm languages/pawn/outline.scm languages/pawn/tasks.json dist/zed-pawn/languages/pawn/
