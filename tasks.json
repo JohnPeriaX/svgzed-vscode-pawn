@@ -1,0 +1,27 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build-normal",
+      "type": "shell",
+      "command": "pawncc", // pawncc compiler location, we suggest to add pawncc path into your environment
+      "args": [
+        "grandlarc.pwn", // source file of gamemode
+        "-Dgamemodes", // Additional compiler arguments
+        "'-;+'",
+        "'-(+'",
+        "'-d3'"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "isBackground": false,
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated"
+      },
+      "problemMatcher": "$pawncc"
+    }
+  ]
+}

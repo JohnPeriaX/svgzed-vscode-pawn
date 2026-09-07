@@ -12,3 +12,14 @@ grammars/c/
 .idea/
 .DS_Store
 Thumbs.db
+
+# VS Code / Node artifacts from the upstream project
+out/
+dist/
+node_modules/
+.vscode-test/
+*.vsix
+scripts/
+package-lock.json
+snippets/
+test/

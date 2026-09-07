@@ -1,0 +1,199 @@
+{
+  "name": "pawn-development",
+  "displayName": "Pawn Development Tool",
+  "description": "Pawn development tool for open.mp and SA:MP",
+  "version": "1.1.5",
+  "publisher": "openmp",
+  "engines": {
+    "vscode": "^1.30.0"
+  },
+  "bugs": {
+    "url": "https://github.com/openmultiplayer/vscode-pawn/issues",
+    "email": "reach@amii.ir"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/openmultiplayer/vscode-pawn.git"
+  },
+  "icon": "icon.png",
+  "categories": [
+    "Programming Languages",
+    "Formatters",
+    "Snippets",
+    "Other"
+  ],
+  "keywords": [
+    "open.mp",
+    "omp",
+    "open multiplayer",
+    "openmultiplayer",
+    "samp",
+    "vscode",
+    "pawn",
+    "language",
+    "new",
+    "sa:mp",
+    "sa-mp"
+  ],
+  "activationEvents": [
+    "onCommand:pawn-development.initScanDir",
+    "onCommand:pawn-development.pawnignore",
+    "onCommand:pawn-development.initTask",
+    "onLanguage:pawn",
+    "onLanguage:Pawn"
+  ],
+  "main": "./out/client/extension.js",
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "npm run compile && node ./node_modules/vscode/bin/test",
+    "publish": "vsce publish minor"
+  },
+  "dependencies": {
+    "@types/vscode": "^1.70.0",
+    "astyle": "^2.0.0",
+    "vscode-languageclient": "^8.0.2",
+    "vscode-languageserver": "^8.0.2",
+    "vscode-languageserver-textdocument": "^1.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^18.7.6",
+    "@typescript-eslint/eslint-plugin": "^5.33.1",
+    "@typescript-eslint/parser": "^5.33.1",
+    "eslint": "^8.22.0",
+    "typescript": "^4.7.4"
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "pawn",
+        "aliases": [
+          "Pawn",
+          "pawn"
+        ],
+        "extensions": [
+          ".pawnignore",
+          ".p",
+          ".pwn",
+          ".inc",
+          ".pawn"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "pawn",
+        "scopeName": "source.pawn",
+        "path": "./syntaxes/Pawn.tmLanguage"
+      }
+    ],
+    "configuration": {
+      "id": "pawn",
+      "type": "object",
+      "title": "Pawn Development",
+      "properties": {
+        "pawn.language.brace_style": {
+          "type": "string",
+          "default": "Allman",
+          "description": "Format your code with chosen brace-style",
+          "enum": [
+            "Allman",
+            "K&R",
+            "Stroustrup",
+            "Google"
+          ]
+        },
+        "pawn.language.allowDefine": {
+          "type": "boolean",
+          "default": "true",
+          "description": "Allow to collect #define for auto completion"
+        },
+        "pawn.language.allowDefineFunction": {
+          "type": "boolean",
+          "default": "true",
+          "description": "Allow to collect #define (function style) for auto completion"
+        },
+        "pawn.language.allowFunction": {
+          "type": "boolean",
+          "default": "true",
+          "description": "Allow to collect functions for auto completion"
+        },
+        "pawn.language.allowNatives": {
+          "type": "boolean",
+          "default": "true",
+          "description": "Allow to collect natives for auto completion"
+        },
+        "pawn.language.allowWords": {
+          "type": "boolean",
+          "default": "true",
+          "description": "Allow to collect words from document for auto completion"
+        },
+        "pawn.language.allowCustomSnip": {
+          "type": "boolean",
+          "default": "true",
+          "description": "Allow to collect #defineSnip for auto completion"
+        },
+        "pawn.language.startRegion": {
+          "type": "string",
+          "default": "(//#region)|(/\\*)|\\{|#if",
+          "description": "regex expression for start of region\nproceed with caution, you can break this so leave default if you don't know about this."
+        },
+        "pawn.language.endRegion": {
+          "type": "string",
+          "default": "(//#endregion)|(\\*/)|\\}|#endif",
+          "description": "regex expression for end of region\nproceed with caution, you can break this so leave default if you don't know about this."
+        },
+        "pawn.language.showLastLineOfRegion": {
+          "type": "boolean",
+          "default": "true",
+          "description": "enable to view last line of region section when it's collaped, if you select false then only first line will be visible."
+        }
+      }
+    },
+    "problemMatchers": [
+      {
+        "name": "pawncc",
+        "owner": "pawn",
+        "fileLocation": [
+          "relative",
+          "${workspaceRoot}/gamemodes"
+        ],
+        "pattern": {
+          "regexp": "^(.*?)\\(([0-9]*)[- 0-9]*\\) \\: (fatal error|error|warning) [0-9]*\\: (.*)$",
+          "file": 1,
+          "location": 2,
+          "severity": 3,
+          "message": 4
+        }
+      }
+    ],
+    "commands": [
+      {
+        "command": "pawn-development.initScanDir",
+        "title": "Pawn Development: Initialize .pawnignore"
+      },
+      {
+        "command": "pawn-development.initTask",
+        "title": "Pawn Development: Initialize Pawn Build Task"
+      },
+      {
+        "command": "pawn-development.pawnignore",
+        "title": "Add to .pawnignore"
+      },
+      {
+        "command": "pawn-development.reloadDefs",
+        "title": "Pawn Development: reload definitions"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "pawn-development.pawnignore",
+          "group": "navigation"
+        }
+      ]
+    }
+  }
+}
