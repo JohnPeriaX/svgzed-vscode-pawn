@@ -1,0 +1,26 @@
+[
+  {
+    "label": "Pawn: Build current file",
+    "command": "pawncc",
+    "args": ["$ZED_FILE", "-;+", "-(+", "-d3"],
+    "tags": ["pawn-build"]
+  },
+  {
+    "label": "Pawn: Build with sampctl",
+    "command": "sampctl",
+    "args": ["package", "build"],
+    "tags": ["pawn-build"]
+  },
+  {
+    "label": "Pawn: Build sampctl profile dev",
+    "command": "sampctl",
+    "args": ["package", "build", "dev"],
+    "tags": ["pawn-build"]
+  },
+  {
+    "label": "Pawn: Build sampctl profile release",
+    "command": "sampctl",
+    "args": ["package", "build", "release"],
+    "tags": ["pawn-build"]
+  }
+]

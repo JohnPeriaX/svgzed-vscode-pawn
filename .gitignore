@@ -1,0 +1,14 @@
+﻿# Rust build artifacts
+target/
+
+# Generated Zed extension binary
+extension.wasm
+
+# Embedded / temporary grammar checkout
+grammars/c/
+
+# Editor / OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
