@@ -27,6 +27,9 @@ jobs:
       - name: Run encoding tests
         run: npm run test:encoding
 
+      - name: Run formatter tests
+        run: npm run test:formatter
+
       - name: Build Pawn language server
         run: |
           mkdir -p dist/zed-pawn
@@ -34,7 +37,7 @@ jobs:
           cp node_modules/astyle/dist/libastyle.wasm dist/zed-pawn/libastyle.wasm
 
       - name: Build VS Code extension
-        run: npx @vscode/vsce package --no-dependencies --out release/pawn-development-1.1.5.vsix
+        run: npx @vscode/vsce package --no-dependencies --no-yarn --out release/pawn-development-1.1.5.vsix
 
       - name: Build Zed extension WASM
         run: |
