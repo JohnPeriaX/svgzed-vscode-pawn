@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { encodeUtf8PawnLiteralsToEscapes, decodeUtf8Strict, type PawnEncoding } from "./codec";
+import { encodeUtf8ToLegacy, decodeUtf8Strict, type PawnEncoding } from "./codec";
 
 export type SourceEncoding = "auto" | "utf-8" | PawnEncoding;
 
@@ -103,7 +103,7 @@ function writePreparedFile(
       preservedFiles.push(sourcePath);
       return;
     }
-    const encoded = encodeUtf8PawnLiteralsToEscapes(text, target);
+    const encoded = encodeUtf8ToLegacy(bytes, target);
     if (encoded.failures.length > 0) {
       const failure = encoded.failures[0];
       diagnostics.push({
@@ -115,7 +115,7 @@ function writePreparedFile(
       });
       return;
     }
-    fs.writeFileSync(destination, Buffer.from(encoded.text, "utf8"));
+    fs.writeFileSync(destination, encoded.bytes);
     convertedFiles.push(sourcePath);
     return;
   }

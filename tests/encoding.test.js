@@ -74,7 +74,7 @@ test("quotes inside Pawn comments do not corrupt literal state", () => {
   assert.equal(result.convertedCharacters, 8);
 });
 
-test("UTF-8 source is converted only in the build mirror", () => {
+test("UTF-8 source is converted to raw legacy bytes only in the build mirror", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "pawn-encoding-"));
   try {
     fs.mkdirSync(path.join(root, "gamemodes"), { recursive: true });
@@ -83,9 +83,10 @@ test("UTF-8 source is converted only in the build mirror", () => {
     fs.writeFileSync(source, original);
     const prepared = preparePawnBuild(root, source, "windows-874");
     const mirrored = fs.readFileSync(path.join(prepared.root, "gamemodes", "main.pwn"));
+    const expected = Buffer.from('new msg[] = "สวัสดี";\n', "utf8");
+    const encoded = encodeUtf8ToLegacy(expected, "windows-874");
     assert.deepEqual(fs.readFileSync(source), original);
-    assert.equal(mirrored.includes(0xe0), false);
-    assert.equal(mirrored.toString("utf8"), 'new msg[] = "\\xCA;\\xC7;\\xD1;\\xCA;\\xB4;\\xD5;";\n');
+    assert.deepEqual(mirrored, encoded.bytes);
     assert.equal(prepared.convertedFiles.length, 1);
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
