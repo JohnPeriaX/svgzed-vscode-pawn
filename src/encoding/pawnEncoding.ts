@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { encodeUtf8ToLegacy, decodeUtf8Strict, type PawnEncoding } from "./codec";
+import { encodeUtf8PawnLiteralsToEscapes, decodeUtf8Strict, type PawnEncoding } from "./codec";
 
 export type SourceEncoding = "auto" | "utf-8" | PawnEncoding;
 
@@ -97,7 +97,13 @@ function writePreparedFile(
   fs.mkdirSync(path.dirname(destination), { recursive: true });
   const mode = detectSourceEncoding(bytes, "auto");
   if (mode === "utf-8") {
-    const encoded = encodeUtf8ToLegacy(bytes, target);
+    const text = decodeUtf8Strict(bytes);
+    if (text === undefined) {
+      fs.writeFileSync(destination, bytes);
+      preservedFiles.push(sourcePath);
+      return;
+    }
+    const encoded = encodeUtf8PawnLiteralsToEscapes(text, target);
     if (encoded.failures.length > 0) {
       const failure = encoded.failures[0];
       diagnostics.push({
@@ -109,7 +115,7 @@ function writePreparedFile(
       });
       return;
     }
-    fs.writeFileSync(destination, encoded.bytes);
+    fs.writeFileSync(destination, Buffer.from(encoded.text, "utf8"));
     convertedFiles.push(sourcePath);
     return;
   }

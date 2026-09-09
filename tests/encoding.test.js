@@ -6,6 +6,7 @@ const { test } = require("node:test");
 const {
   decodeUtf8Strict,
   encodeUtf8ToLegacy,
+  encodeUtf8PawnLiteralsToEscapes,
 } = require("../out/encoding/codec.js");
 const { preparePawnBuild } = require("../out/encoding/pawnEncoding.js");
 
@@ -51,6 +52,13 @@ test("legacy CP874 source is preserved byte-for-byte", () => {
   }
 });
 
+test("UTF-8 Pawn literals become compiler byte escapes in the build mirror", () => {
+  const result = encodeUtf8PawnLiteralsToEscapes('new msg[] = "สวัสดี";\n', "windows-874");
+  assert.deepEqual(result.failures, []);
+  assert.equal(result.text, 'new msg[] = "\\xCA;\\xC7;\\xD1;\\xCA;\\xB4;\\xD5;";\n');
+  assert.equal(result.convertedCharacters, 6);
+});
+
 test("UTF-8 source is converted only in the build mirror", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "pawn-encoding-"));
   try {
@@ -62,7 +70,7 @@ test("UTF-8 source is converted only in the build mirror", () => {
     const mirrored = fs.readFileSync(path.join(prepared.root, "gamemodes", "main.pwn"));
     assert.deepEqual(fs.readFileSync(source), original);
     assert.equal(mirrored.includes(0xe0), false);
-    assert.equal(mirrored.toString("hex"), "6e6577206d73675b5d203d2022cac7d1cab4d5223b0a");
+    assert.equal(mirrored.toString("utf8"), 'new msg[] = "\\xCA;\\xC7;\\xD1;\\xCA;\\xB4;\\xD5;";\n');
     assert.equal(prepared.convertedFiles.length, 1);
   } finally {
     fs.rmSync(root, { recursive: true, force: true });

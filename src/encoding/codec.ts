@@ -22,7 +22,7 @@ function reverseTable(table: Record<number, number>): Map<number, number> {
   const map = new Map<number, number>();
   for (const [byteText, codePoint] of Object.entries(table)) {
     const byte = Number(byteText);
-    if (!map.has(codePoint)) map.set(codePoint, byte);
+    if (byte >= 0x80 && !map.has(codePoint)) map.set(codePoint, byte);
   }
   return map;
 }
@@ -50,4 +50,74 @@ export function encodeUtf8ToLegacy(bytes: Buffer, encoding: PawnEncoding): Encod
     sourceIndex += character.length;
   }
   return { bytes: Buffer.from(output), encoding, failures };
+}
+
+export interface PawnLiteralEncodeResult {
+  text: string;
+  encoding: PawnEncoding;
+  failures: EncodingFailure[];
+  convertedCharacters: number;
+}
+
+export function encodeUtf8PawnLiteralsToEscapes(text: string, encoding: PawnEncoding): PawnLiteralEncodeResult {
+  const table = reverseTables[encoding];
+  const failures: EncodingFailure[] = [];
+  let output = "";
+  let inString = false;
+  let inChar = false;
+  let escaped = false;
+  let convertedCharacters = 0;
+
+  for (let index = 0; index < text.length; index++) {
+    const character = text[index];
+    const codePoint = character.codePointAt(0)!;
+
+    if (escaped) {
+      output += character;
+      escaped = false;
+      continue;
+    }
+
+    if (character === "\\" && (inString || inChar)) {
+      output += character;
+      escaped = true;
+      continue;
+    }
+
+    if (character === '"' && !inChar) {
+      inString = !inString;
+      output += character;
+      continue;
+    }
+
+    if (character === "'" && !inString) {
+      inChar = !inChar;
+      output += character;
+      continue;
+    }
+
+    if (!inString && !inChar) {
+      output += character;
+      continue;
+    }
+
+    if (codePoint <= 0x7f) {
+      output += character;
+      continue;
+    }
+
+    const encoded = table.get(codePoint);
+    if (encoded === undefined) {
+      failures.push({ codePoint, index });
+      output += character;
+      index += character.length - 1;
+      continue;
+    }
+
+    output += `\\x${encoded.toString(16).toUpperCase()};`;
+    convertedCharacters++;
+    index += character.length - 1;
+  }
+
+  return { text: output, encoding, failures, convertedCharacters };
 }

@@ -1,6 +1,6 @@
 [package]
 name = "zed_pawn"
-version = "0.1.11"
+version = "0.1.12"
 edition = "2021"
 publish = false
 license = "MIT"
