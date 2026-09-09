@@ -15,3 +15,12 @@ README.md
 dist/**
 package-lock.json
 .yarn/**
+
+# Development-only sources/tests
+test/
+src/encoding/index-*.txt
+release/
+
+
+tests/
+test/

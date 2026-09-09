@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
 import { task } from "./task";
+import { preparePawnBuild, resolveTargetEncoding } from "../encoding/pawnEncoding";
 
 const noWorkSpaceError = "You can use this command inside a workspace only.";
 const BUILD_TOOL_SETTING = "pawn.build.tool";
@@ -168,17 +169,29 @@ const buildWithPawncc = async (folder: vscode.WorkspaceFolder, tools: DetectedTo
   const workspacePath = folder.uri.fsPath;
   const gamemodeDir = path.join(workspacePath, "gamemodes");
   const sourcePath = document.fileName;
+  const targetEncoding = resolveTargetEncoding(vscode.workspace.getConfiguration("pawn.encoding").get<string>("target", "windows-874"));
+  const prepared = preparePawnBuild(workspacePath, sourcePath, targetEncoding);
+
+  if (prepared.diagnostics.length > 0) {
+    const first = prepared.diagnostics[0];
+    const location = first.byteIndex === undefined ? "" : ` byte ${first.byteIndex}`;
+    await vscode.window.showErrorMessage(`${first.message}${location} in ${path.relative(workspacePath, first.filePath)}`);
+    return 1;
+  }
+
   const outputBase = path.join(gamemodeDir, `${path.basename(sourcePath, path.extname(sourcePath))}.amx`);
+  const mirroredIncludeDirs = prepared.includeDirs.filter((dir) => fs.existsSync(dir));
+  const includeDirs = [...mirroredIncludeDirs, path.join(tools.pawnoDir, "include")];
   const args = [
-    sourcePath,
+    prepared.sourcePath,
     `-D${gamemodeDir}`,
-    `-i${path.join(tools.pawnoDir, "include")}`,
+    ...includeDirs.map((dir) => `-i${dir}`),
     `-o${outputBase}`,
     "-;+",
     "-(+",
     "-v2",
   ];
-  const buildTask = makeShellTask(folder, "Pawn: Build (Pawno / PawnCC)", tools.pawncc, args, tools.pawnoDir, ["$pawncc"]);
+  const buildTask = makeShellTask(folder, `Pawn: Build (Pawno / PawnCC • ${targetEncoding})`, tools.pawncc, args, tools.pawnoDir, ["$pawncc"]);
   return runTaskAndWait(buildTask);
 };
 export const runPawnBuild = async function () {

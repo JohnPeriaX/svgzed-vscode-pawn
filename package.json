@@ -49,6 +49,7 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "test": "npm run compile && node ./node_modules/vscode/bin/test",
+    "test:encoding": "npm run compile && node --test tests/encoding.test.js",
     "publish": "vsce publish minor"
   },
   "dependencies": {
@@ -94,17 +95,83 @@
       "[pawn]": {
         "editor.tokenColorCustomizations": {
           "textMateRules": [
-            { "scope": "storage.type.class.todo.c", "settings": { "foreground": "#DCDCAA", "fontStyle": "bold" } },
-            { "scope": "storage.type.class.fixme.c", "settings": { "foreground": "#F44747", "fontStyle": "bold" } },
-            { "scope": "storage.type.class.xxx.c", "settings": { "foreground": "#F44747", "fontStyle": "bold" } },
-            { "scope": "storage.type.class.wtf.c", "settings": { "foreground": "#F44747", "fontStyle": "bold" } },
-            { "scope": "storage.type.class.bug.c", "settings": { "foreground": "#F44747", "fontStyle": "bold" } },
-            { "scope": "storage.type.class.review.c", "settings": { "foreground": "#D7BA7D", "fontStyle": "bold" } },
-            { "scope": "storage.type.class.hack.c", "settings": { "foreground": "#D7BA7D", "fontStyle": "bold" } },
-            { "scope": "storage.type.class.note.c", "settings": { "foreground": "#4FC1FF", "fontStyle": "bold" } },
-            { "scope": "storage.type.class.nb.c", "settings": { "foreground": "#4FC1FF", "fontStyle": "bold" } },
-            { "scope": "storage.type.class.idea.c", "settings": { "foreground": "#C586C0", "fontStyle": "bold" } },
-            { "scope": "storage.type.class.done.c", "settings": { "foreground": "#6A9955", "fontStyle": "bold" } }
+            {
+              "scope": "storage.type.class.todo.c",
+              "settings": {
+                "foreground": "#DCDCAA",
+                "fontStyle": "bold"
+              }
+            },
+            {
+              "scope": "storage.type.class.fixme.c",
+              "settings": {
+                "foreground": "#F44747",
+                "fontStyle": "bold"
+              }
+            },
+            {
+              "scope": "storage.type.class.xxx.c",
+              "settings": {
+                "foreground": "#F44747",
+                "fontStyle": "bold"
+              }
+            },
+            {
+              "scope": "storage.type.class.wtf.c",
+              "settings": {
+                "foreground": "#F44747",
+                "fontStyle": "bold"
+              }
+            },
+            {
+              "scope": "storage.type.class.bug.c",
+              "settings": {
+                "foreground": "#F44747",
+                "fontStyle": "bold"
+              }
+            },
+            {
+              "scope": "storage.type.class.review.c",
+              "settings": {
+                "foreground": "#D7BA7D",
+                "fontStyle": "bold"
+              }
+            },
+            {
+              "scope": "storage.type.class.hack.c",
+              "settings": {
+                "foreground": "#D7BA7D",
+                "fontStyle": "bold"
+              }
+            },
+            {
+              "scope": "storage.type.class.note.c",
+              "settings": {
+                "foreground": "#4FC1FF",
+                "fontStyle": "bold"
+              }
+            },
+            {
+              "scope": "storage.type.class.nb.c",
+              "settings": {
+                "foreground": "#4FC1FF",
+                "fontStyle": "bold"
+              }
+            },
+            {
+              "scope": "storage.type.class.idea.c",
+              "settings": {
+                "foreground": "#C586C0",
+                "fontStyle": "bold"
+              }
+            },
+            {
+              "scope": "storage.type.class.done.c",
+              "settings": {
+                "foreground": "#6A9955",
+                "fontStyle": "bold"
+              }
+            }
           ]
         }
       }
@@ -174,6 +241,15 @@
           "type": "boolean",
           "default": "true",
           "description": "enable to view last line of region section when it's collaped, if you select false then only first line will be visible."
+        },
+        "pawn.encoding.target": {
+          "type": "string",
+          "default": "windows-874",
+          "enum": [
+            "windows-874",
+            "windows-1251"
+          ],
+          "description": "Target legacy encoding used for UTF-8 Pawn source during build. Legacy files are preserved unchanged."
         },
         "pawn.build.tool": {
           "type": "string",

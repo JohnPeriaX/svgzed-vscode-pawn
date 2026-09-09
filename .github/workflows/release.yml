@@ -24,6 +24,9 @@ jobs:
       - name: Install Node dependencies
         run: npm install --no-audit --no-fund
 
+      - name: Run encoding tests
+        run: npm run test:encoding
+
       - name: Build Pawn language server
         run: |
           mkdir -p dist/zed-pawn
