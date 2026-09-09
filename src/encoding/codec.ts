@@ -63,14 +63,59 @@ export function encodeUtf8PawnLiteralsToEscapes(text: string, encoding: PawnEnco
   const table = reverseTables[encoding];
   const failures: EncodingFailure[] = [];
   let output = "";
-  let inString = false;
-  let inChar = false;
+  let state: "code" | "lineComment" | "blockComment" | "string" | "char" = "code";
   let escaped = false;
   let convertedCharacters = 0;
 
   for (let index = 0; index < text.length; index++) {
     const character = text[index];
+    const next = text[index + 1];
     const codePoint = character.codePointAt(0)!;
+
+    if (state === "lineComment") {
+      output += character;
+      if (character === "\n") state = "code";
+      continue;
+    }
+
+    if (state === "blockComment") {
+      output += character;
+      if (character === "*" && next === "/") {
+        output += next;
+        index++;
+        state = "code";
+      }
+      continue;
+    }
+
+    if (state === "code") {
+      if (character === "/" && next === "/") {
+        output += "//";
+        index++;
+        state = "lineComment";
+        continue;
+      }
+      if (character === "/" && next === "*") {
+        output += "/*";
+        index++;
+        state = "blockComment";
+        continue;
+      }
+      if (character === '"') {
+        output += character;
+        state = "string";
+        escaped = false;
+        continue;
+      }
+      if (character === "'") {
+        output += character;
+        state = "char";
+        escaped = false;
+        continue;
+      }
+      output += character;
+      continue;
+    }
 
     if (escaped) {
       output += character;
@@ -78,26 +123,20 @@ export function encodeUtf8PawnLiteralsToEscapes(text: string, encoding: PawnEnco
       continue;
     }
 
-    if (character === "\\" && (inString || inChar)) {
+    if (character === "\\") {
       output += character;
       escaped = true;
       continue;
     }
 
-    if (character === '"' && !inChar) {
-      inString = !inString;
+    if (state === "string" && character === '"') {
       output += character;
+      state = "code";
       continue;
     }
-
-    if (character === "'" && !inString) {
-      inChar = !inChar;
+    if (state === "char" && character === "'") {
       output += character;
-      continue;
-    }
-
-    if (!inString && !inChar) {
-      output += character;
+      state = "code";
       continue;
     }
 

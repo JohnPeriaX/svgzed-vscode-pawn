@@ -59,6 +59,21 @@ test("UTF-8 Pawn literals become compiler byte escapes in the build mirror", () 
   assert.equal(result.convertedCharacters, 6);
 });
 
+test("quotes inside Pawn comments do not corrupt literal state", () => {
+  const input = [
+    '// comment with "quotes" และ \'apostrophe\'',
+    '/* block comment with "quotes" และ \'apostrophe\' */',
+    'new msg[] = "ภาษาไทย"; // trailing "quote"',
+    "new const tag = 'ท'; // trailing 'quote'",
+  ].join("\n") + "\n";
+  const result = encodeUtf8PawnLiteralsToEscapes(input, "windows-874");
+  assert.deepEqual(result.failures, []);
+  assert.equal(result.text.includes('comment with "quotes"'), true);
+  assert.equal(result.text.includes('new msg[] = "\\xC0;\\xD2;\\xC9;\\xD2;\\xE4;\\xB7;\\xC2;";'), true);
+  assert.equal(result.text.includes("new const tag = '\\xB7;';"), true);
+  assert.equal(result.convertedCharacters, 8);
+});
+
 test("UTF-8 source is converted only in the build mirror", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "pawn-encoding-"));
   try {
