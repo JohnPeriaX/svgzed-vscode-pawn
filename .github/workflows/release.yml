@@ -15,6 +15,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Build Pawn language server
+        run: |
+          mkdir -p dist/zed-pawn
+          npx esbuild src/server/server.ts --bundle --platform=node --target=node18 --outfile=dist/zed-pawn/pawn-language-server.js
+          cp node_modules/astyle/dist/libastyle.wasm dist/zed-pawn/libastyle.wasm
+
+      - name: Verify release assets
+        run: |
+          test -s dist/zed-pawn/pawn-language-server.js
+          test -s dist/zed-pawn/libastyle.wasm
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -22,4 +42,5 @@ jobs:
           files: |
             release/pawn-development-1.1.5.vsix
             release/zed-pawn-0.1.6.zip
-            release/pawn-language-server.js
+            dist/zed-pawn/pawn-language-server.js
+            dist/zed-pawn/libastyle.wasm
