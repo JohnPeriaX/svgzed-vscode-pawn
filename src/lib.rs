@@ -2,11 +2,9 @@ use std::env;
 
 use zed_extension_api::{self as zed, DownloadedFileType, LanguageServerId, Result};
 
-const SERVER_URL: &str = "https://github.com/JohnPeriaX/svgzed-vscode-pawn/releases/download/v0.1.7/pawn-language-server.js";
+const SERVER_URL_PREFIX: &str = "https://github.com/JohnPeriaX/svgzed-vscode-pawn/releases/download/";
 const SERVER_FILE: &str = "pawn-language-server.js";
-const ASTYLE_WASM_URL: &str = "https://github.com/JohnPeriaX/svgzed-vscode-pawn/releases/download/v0.1.7/libastyle.wasm";
 const ASTYLE_WASM_FILE: &str = "libastyle.wasm";
-
 struct PawnExtension;
 
 impl zed::Extension for PawnExtension {
@@ -42,12 +40,15 @@ impl zed::Extension for PawnExtension {
         }
 
         let server_path = extension_dir.join(SERVER_FILE);
+        let version = env!("CARGO_PKG_VERSION");
+        let server_url = format!("{}v{}/{}", SERVER_URL_PREFIX, version, SERVER_FILE);
         let wasm_path = extension_dir.join(ASTYLE_WASM_FILE);
+        let astyle_wasm_url = format!("{}v{}/{}", SERVER_URL_PREFIX, version, ASTYLE_WASM_FILE);
         if !server_path.exists() {
-            zed::download_file(SERVER_URL, SERVER_FILE, DownloadedFileType::Uncompressed)?;
+            zed::download_file(&server_url, SERVER_FILE, DownloadedFileType::Uncompressed)?;
         }
         if !wasm_path.exists() {
-            zed::download_file(ASTYLE_WASM_URL, ASTYLE_WASM_FILE, DownloadedFileType::Uncompressed)?;
+            zed::download_file(&astyle_wasm_url, ASTYLE_WASM_FILE, DownloadedFileType::Uncompressed)?;
         }
 
         Ok(zed::Command {

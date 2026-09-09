@@ -30,10 +30,35 @@ jobs:
           npx esbuild src/server/server.ts --bundle --platform=node --target=node18 --outfile=dist/zed-pawn/pawn-language-server.js
           cp node_modules/astyle/dist/libastyle.wasm dist/zed-pawn/libastyle.wasm
 
+      - name: Build VS Code extension
+        run: npx @vscode/vsce package --no-dependencies --out release/pawn-development-1.1.5.vsix
+
+      - name: Build Zed extension WASM
+        run: |
+          rustup target add wasm32-wasip2
+          cargo build --release --target wasm32-wasip2
+          cp target/wasm32-wasip2/release/zed_pawn.wasm extension.wasm
+
+      - name: Build Zed release bundle
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          mkdir -p dist/zed-extension/dist/zed-pawn
+          cp extension.toml extension.wasm dist/zed-extension/
+          cp -r languages grammars dist/zed-extension/
+          cp icon.png LICENSE dist/zed-extension/
+          cp dist/zed-pawn/pawn-language-server.js dist/zed-extension/dist/zed-pawn/
+          cp dist/zed-pawn/libastyle.wasm dist/zed-extension/dist/zed-pawn/
+          cd dist/zed-extension
+          zip -r "../../release/zed-pawn-${VERSION}.zip" .
+
       - name: Verify release assets
         run: |
+          VERSION="${GITHUB_REF_NAME}"
+          test -s release/pawn-development-1.1.5.vsix
+          test -s "release/zed-pawn-${VERSION}.zip"
           test -s dist/zed-pawn/pawn-language-server.js
           test -s dist/zed-pawn/libastyle.wasm
+          test -s extension.wasm
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -41,6 +66,6 @@ jobs:
           generate_release_notes: true
           files: |
             release/pawn-development-1.1.5.vsix
-            release/zed-pawn-0.1.6.zip
+            release/zed-pawn-${{ github.ref_name }}.zip
             dist/zed-pawn/pawn-language-server.js
             dist/zed-pawn/libastyle.wasm

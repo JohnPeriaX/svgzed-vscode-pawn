@@ -3290,21 +3290,21 @@ var require_main2 = __commonJS({
         }
         Color2.is = is;
       })(Color = exports3.Color || (exports3.Color = {}));
-      var ColorInformation;
-      (function(ColorInformation2) {
+      var ColorInformation2;
+      (function(ColorInformation3) {
         function create(range, color) {
           return {
             range,
             color
           };
         }
-        ColorInformation2.create = create;
+        ColorInformation3.create = create;
         function is(value) {
           var candidate = value;
           return Is.objectLiteral(candidate) && Range.is(candidate.range) && Color.is(candidate.color);
         }
-        ColorInformation2.is = is;
-      })(ColorInformation = exports3.ColorInformation || (exports3.ColorInformation = {}));
+        ColorInformation3.is = is;
+      })(ColorInformation2 = exports3.ColorInformation || (exports3.ColorInformation = {}));
       var ColorPresentation;
       (function(ColorPresentation2) {
         function create(label, textEdit, additionalTextEdits) {
@@ -14023,7 +14023,8 @@ var doGoToDef = (document2, position) => {
 };
 
 // src/server/server.ts
-var connection = (0, import_node.createConnection)(import_node.ProposedFeatures.all);
+var useStdioTransport = process.argv.includes("--stdio");
+var connection = useStdioTransport ? (0, import_node.createConnection)(import_node.ProposedFeatures.all, process.stdin, process.stdout) : (0, import_node.createConnection)(import_node.ProposedFeatures.all);
 var documents = new import_node.TextDocuments(import_vscode_languageserver_textdocument.TextDocument);
 documents.listen(connection);
 connection.listen();
@@ -14036,6 +14037,7 @@ connection.onInitialize(() => ({
     signatureHelpProvider: { triggerCharacters: ["(", ","] },
     documentFormattingProvider: true,
     documentRangeFormattingProvider: true,
+    colorProvider: true,
     workspace: { workspaceFolders: { supported: true } }
   }
 }));
@@ -14083,6 +14085,33 @@ connection.onDocumentRangeFormatting(async (params) => {
   const text = document2.getText(params.range);
   const formatted = await formatPawn(text);
   return [import_node.TextEdit.replace(params.range, formatted)];
+});
+var SAMP_COLOR_PATTERN = /(?:\{([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})\}|\b0[xX]([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})\b)/g;
+connection.onDocumentColor(async (params) => {
+  const document2 = documents.get(params.textDocument.uri);
+  if (document2 === void 0) return [];
+  const colors = [];
+  const lines = document2.getText().split(/\r?\n/);
+  for (let line = 0; line < lines.length; line++) {
+    const text = lines[line];
+    SAMP_COLOR_PATTERN.lastIndex = 0;
+    let match;
+    while ((match = SAMP_COLOR_PATTERN.exec(text)) !== null) {
+      const hex = match[1] ?? match[2];
+      const red = parseInt(hex.slice(0, 2), 16) / 255;
+      const green = parseInt(hex.slice(2, 4), 16) / 255;
+      const blue = parseInt(hex.slice(4, 6), 16) / 255;
+      const alpha = hex.length === 8 ? parseInt(hex.slice(6, 8), 16) / 255 : 1;
+      colors.push({
+        range: {
+          start: { line, character: match.index },
+          end: { line, character: match.index + match[0].length }
+        },
+        color: { red, green, blue, alpha }
+      });
+    }
+  }
+  return colors;
 });
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
