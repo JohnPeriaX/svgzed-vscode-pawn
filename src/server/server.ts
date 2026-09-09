@@ -15,10 +15,15 @@ import {
   DocumentColorParams,
   ColorInformation,
   TextEdit,
+  DocumentHighlightParams,
+  DocumentHighlight,
+  Diagnostic,
+  DiagnosticSeverity,
 } from "vscode-languageserver/node";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { expandPawnFormatRange, formatPawn } from "../pawnFormatter";
+import { scanPawnBraces } from "../braceScanner";
 import { parseSnippets, doCompletion, doCompletionResolve, doGoToDef, doHover, doSignHelp, resetAutocompletes } from "./parser";
 
 const useStdioTransport = process.argv.includes("--stdio");
@@ -39,10 +44,44 @@ connection.onInitialize(() => ({
     documentFormattingProvider: true,
     documentRangeFormattingProvider: true,
     colorProvider: true,
+    documentHighlightProvider: true,
     workspace: { workspaceFolders: { supported: true } },
   },
 }));
 
+function pawnPosition(document: TextDocument, offset: number) {
+  return document.positionAt(offset);
+}
+
+function braceDiagnostics(document: TextDocument): Diagnostic[] {
+  const text = document.getText();
+  const scan = scanPawnBraces(text);
+  return scan.unmatched.map((item) => ({
+    severity: DiagnosticSeverity.Error,
+    range: { start: pawnPosition(document, item.offset), end: pawnPosition(document, item.offset + 1) },
+    message: item.kind === "open" ? "Unmatched { : missing closing }." : "Unmatched } : no matching opening {.",
+    source: "pawn-braces",
+    code: item.kind === "open" ? "missing-close-brace" : "unmatched-close-brace",
+  }));
+}
+
+connection.onDocumentHighlight((params: DocumentHighlightParams): DocumentHighlight[] => {
+  const document = documents.get(params.textDocument.uri);
+  if (document === undefined) return [];
+  const text = document.getText();
+  const offset = document.offsetAt(params.position);
+  const scan = scanPawnBraces(text);
+  const pair = scan.pairAt(offset === text.length ? offset - 1 : offset);
+  if (!pair) return [];
+  return [
+    { range: { start: pawnPosition(document, pair.open), end: pawnPosition(document, pair.open + 1) } },
+    { range: { start: pawnPosition(document, pair.close), end: pawnPosition(document, pair.close + 1) } },
+  ];
+});
+
+function publishBraceDiagnostics(document: TextDocument) {
+  void connection.sendDiagnostics({ uri: document.uri, diagnostics: braceDiagnostics(document) });
+}
 connection.onNotification("revalidateAllOpenedDocuments", () => {
   resetAutocompletes();
   documents.all().forEach((doc) => parseSnippets(doc));
@@ -52,8 +91,9 @@ connection.onDidChangeConfiguration(() => {
   documents.all().forEach((doc) => parseSnippets(doc));
 });
 
-documents.onDidChangeContent((change) => parseSnippets(change.document, false));
-documents.onDidSave((change) => parseSnippets(change.document));
+documents.onDidOpen((change) => publishBraceDiagnostics(change.document));
+documents.onDidChangeContent((change) => { parseSnippets(change.document, false); publishBraceDiagnostics(change.document); });
+documents.onDidSave((change) => { parseSnippets(change.document); publishBraceDiagnostics(change.document); });
 
 connection.onDefinition((params: DefinitionParams) => {
   const doc = documents.get(params.textDocument.uri);

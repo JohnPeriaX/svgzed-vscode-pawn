@@ -12,23 +12,25 @@ function send(id, method, params) {
 }
 function waitResponse(id) {
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error("LSP response timeout")), 10000);
+    const timer = setTimeout(() => reject(new Error(`LSP response timeout id=${id}`)), 10000);
     const onData = (chunk) => {
       buffer = Buffer.concat([buffer, chunk]);
-      const headerEnd = buffer.indexOf(Buffer.from("\r\n\r\n"));
-      if (headerEnd < 0) return;
-      const header = buffer.subarray(0, headerEnd).toString();
-      const match = header.match(/Content-Length:\s*(\d+)/i);
-      if (!match) return;
-      const length = Number(match[1]);
-      const start = headerEnd + 4;
-      if (buffer.length < start + length) return;
-      const message = JSON.parse(buffer.subarray(start, start + length).toString());
-      buffer = buffer.subarray(start + length);
-      if (message.id !== id) return;
-      clearTimeout(timer); server.stdout.off("data", onData); resolve(message);
-    };
-    server.stdout.on("data", onData);
+      while (true) {
+        const headerEnd = buffer.indexOf(Buffer.from("\r\n\r\n"));
+        if (headerEnd < 0) return;
+        const header = buffer.subarray(0, headerEnd).toString();
+        const match = header.match(/Content-Length:\s*(\d+)/i);
+        if (!match) return;
+        const length = Number(match[1]);
+        const start = headerEnd + 4;
+        if (buffer.length < start + length) return;
+        const message = JSON.parse(buffer.subarray(start, start + length).toString());
+        buffer = buffer.subarray(start + length);
+        if (message.id === id) {
+          clearTimeout(timer); server.stdout.off("data", onData); resolve(message); return;
+        }
+      }
+    };    server.stdout.on("data", onData);
   });
 }
 
@@ -50,6 +52,12 @@ function waitResponse(id) {
   assert.equal(edit.range.start.line, 1);
   assert.equal(edit.range.end.line, 3);
   assert.match(edit.newText, /if\s*\([^\n]+\)\s+return 1;/);
-  console.log("LSP_RANGE_FORMAT_OK");
+  const openOffset = sample.indexOf("{");
+  send(3, "textDocument/documentHighlight", { textDocument: { uri }, position: linesToOffset(openOffset) });
+  const highlightResponse = await waitResponse(3);
+  assert.equal(highlightResponse.error, undefined);
+  assert.equal(highlightResponse.result.length, 2);
+  assert.equal(highlightResponse.result[0].range.start.character, linesToOffset(openOffset).character);
+  console.log("LSP_BRACE_HIGHLIGHT_OK");  console.log("LSP_RANGE_FORMAT_OK");
   server.kill();
 })().catch((error) => { server.kill(); console.error(error); process.exitCode = 1; });

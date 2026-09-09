@@ -7,6 +7,7 @@ import path = require("path");
 import { LanguageClient, LanguageClientOptions, ServerOptions, State, TransportKind } from "vscode-languageclient/node";
 import { addToPawnIgnore, InitPawnIgnore } from "./whitelistedpaths";
 import PawnFoldingProvider from "./FoldingProvider";
+import { registerPawnBraceMatching } from "./braceMatching";
 
 const SAMP_COLOR_PATTERNS = [
   /\{([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})\}/g,
@@ -101,6 +102,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(vscode.languages.registerDocumentFormattingEditProvider("pawn", PawnDocumentFormattingEditProvider));
   context.subscriptions.push(vscode.languages.registerDocumentRangeFormattingEditProvider("pawn", PawnDocumentFormattingEditProvider));
+  context.subscriptions.push(registerPawnBraceMatching(context));
   if (vscode.workspace.getConfiguration("pawn.language").get<boolean>("enableSampColorPicker", true)) {
     context.subscriptions.push(vscode.languages.registerColorProvider("pawn", new PawnColorProvider()));
   }
