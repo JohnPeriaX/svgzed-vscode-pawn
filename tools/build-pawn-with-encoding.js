@@ -56,10 +56,36 @@ console.log(`[Pawn Encoding] target: ${encoding.resolveTargetEncoding(target)}`)
 console.log(`[Pawn Encoding] converted files: ${prepared.convertedFiles.length}`);
 console.log(`[Pawn Encoding] preserved legacy files: ${prepared.preservedFiles.length}`);
 
-const result = spawnSync(pawncc, compilerArgs, {
-  cwd: path.join(workspaceRoot, "pawno"),
-  stdio: "inherit",
-  windowsHide: false,
-});
-if (result.error) fail(result.error.message);
-process.exit(result.status === null ? 1 : result.status);
+const tempRoot = path.join(workspaceRoot, "pawn-build-output");
+fs.mkdirSync(tempRoot, { recursive: true });
+const tempDir = fs.mkdtempSync(path.join(tempRoot, "build-"));
+const tempOutput = path.join(tempDir, "pawn_build.amx");
+const tempCompilerArgs = compilerArgs.map((arg) => (arg === `-o${output}` ? `-o${tempOutput}` : arg));
+let keepTemp = false;
+try {
+  if (fs.existsSync(tempOutput)) fs.rmSync(tempOutput, { force: true });
+  const result = spawnSync(pawncc, tempCompilerArgs, {
+    cwd: path.join(workspaceRoot, "pawno"),
+    stdio: "inherit",
+    windowsHide: false,
+  });
+  if (result.error) fail(result.error.message);
+  const status = result.status === null ? 1 : result.status;
+  if (status !== 0) {
+    process.exitCode = status;
+  } else if (!fs.existsSync(tempOutput)) {
+    fail(`compiler reported success but output was not created: ${tempOutput}`);
+  } else {
+    const outputSize = fs.statSync(tempOutput).size;
+    if (outputSize <= 0) fail(`compiler reported success but output is empty: ${output}`);
+    fs.rmSync(output, { force: true });
+    fs.renameSync(tempOutput, output);
+    console.log(`[Pawn Encoding] output: ${outputSize} bytes`);
+  }
+} finally {
+  if (!keepTemp && fs.existsSync(tempOutput)) {
+    try { fs.rmSync(tempOutput, { force: true }); } catch (error) {
+      console.warn(`[Pawn Encoding] warning: could not remove temp output: ${error.message}`);
+    }
+  }
+}

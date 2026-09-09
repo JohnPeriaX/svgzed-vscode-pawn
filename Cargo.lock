@@ -764,7 +764,7 @@ dependencies = [
 
 [[package]]
 name = "zed_pawn"
-version = "0.1.10"
+version = "0.1.11"
 dependencies = [
  "zed_extension_api",
 ]
