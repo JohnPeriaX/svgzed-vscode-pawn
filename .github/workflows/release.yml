@@ -49,6 +49,7 @@ jobs:
           cp extension.toml extension.wasm dist/zed-extension/
           cp -r languages grammars dist/zed-extension/
           cp icon.png LICENSE dist/zed-extension/
+          cp -r tools dist/zed-extension/
           cp dist/zed-pawn/pawn-language-server.js dist/zed-extension/dist/zed-pawn/
           cp dist/zed-pawn/libastyle.wasm dist/zed-extension/dist/zed-pawn/
           cd dist/zed-extension

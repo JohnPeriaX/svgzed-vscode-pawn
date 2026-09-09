@@ -49,7 +49,7 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "test": "npm run compile && node ./node_modules/vscode/bin/test",
-    "test:encoding": "npm run compile && node --test tests/encoding.test.js",
+    "test:encoding": "npm run compile && node --test tests/encoding.test.js tests/whatwg-complete.test.js",
     "publish": "vsce publish minor"
   },
   "dependencies": {

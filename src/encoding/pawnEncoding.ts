@@ -156,8 +156,8 @@ export function preparePawnBuild(workspacePath: string, sourcePath: string, targ
 
   return {
     root,
-    sourcePath: relativeMirrorPath(root, workspacePath, path.resolve(sourcePath)),
-    includeDirs: includeDirs.map((dir) => relativeMirrorPath(root, workspacePath, path.resolve(dir))),
+    sourcePath: path.join(root, path.relative(workspacePath, path.resolve(sourcePath))),
+    includeDirs: includeDirs.map((dir) => path.join(root, path.relative(workspacePath, path.resolve(dir)))),
     diagnostics,
     convertedFiles,
     preservedFiles,
