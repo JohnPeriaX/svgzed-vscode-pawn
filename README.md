@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Pawn for Zed
 
 Pawn language support for Zed, built from the existing open.mp / SA-MP Pawn tooling ecosystem.
@@ -36,7 +35,6 @@ The language-server implementation is based on `openmultiplayer/vscode-pawn` in 
 ## Next milestone
 
 Replace the C parser layer with a real `tree-sitter-pawn` grammar while keeping the same Zed capture vocabulary. Then add compiler-aware diagnostics and explicit Pawn build/compile configuration so `pawncc` and `sampctl` can be selected independently.
-=======
 [![](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/samp)  [![](https://img.shields.io/badge/website-000000?style=for-the-badge&logo=About.me&logoColor=white)](https://open.mp)
 
 # pawn-development
@@ -120,4 +118,3 @@ To actually compile after you've set up the `tasks.json` below, press
 `CTRL + Shift + B` (Windows) or `CMD + Shift + B` (Mac), or alternatively open up the
 command palette with `CTRL + Shift + P` (Windows) or `CMD + Shift + P` (Mac) and type
 `Run Task`, hit enter and select `build-normal`.
->>>>>>> origin/master

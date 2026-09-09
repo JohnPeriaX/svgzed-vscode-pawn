@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-import { formatPawn, PawnBraceStyle } from "../pawnFormatter";
+import { expandPawnFormatRange, formatPawn, PawnBraceStyle } from "../pawnFormatter";
 
-function getBraceStyle(): PawnBraceStyle {
-  const value = vscode.workspace.getConfiguration().get<PawnBraceStyle>("pawn.language.brace_style", "Allman");
-  return value === "K&R" || value === "Stroustrup" || value === "Google" ? value : "Allman";
+export function getBraceStyle(): PawnBraceStyle {
+  const value = vscode.workspace.getConfiguration().get<PawnBraceStyle>("pawn.language.brace_style", "K&R");
+  return value === "K&R" || value === "Stroustrup" || value === "Google" || value === "Allman" ? value : "K&R";
 }
 
 const PawnDocumentFormattingEditProvider = {
@@ -17,8 +17,13 @@ const PawnDocumentFormattingEditProvider = {
   },
 
   async provideDocumentRangeFormattingEdits(document: vscode.TextDocument, range: vscode.Range) {
-    const content = await formatPawn(document.getText(range), getBraceStyle());
-    return [new vscode.TextEdit(range, content)];
+    const expanded = expandPawnFormatRange(document.getText(), {
+      start: document.offsetAt(range.start),
+      end: document.offsetAt(range.end),
+    });
+    const formatRange = new vscode.Range(document.positionAt(expanded.start), document.positionAt(expanded.end));
+    const content = await formatPawn(document.getText(formatRange), getBraceStyle());
+    return [new vscode.TextEdit(formatRange, content)];
   },
 };
 

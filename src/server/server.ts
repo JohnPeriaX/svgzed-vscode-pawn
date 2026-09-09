@@ -18,7 +18,7 @@ import {
 } from "vscode-languageserver/node";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { formatPawn } from "../pawnFormatter";
+import { expandPawnFormatRange, formatPawn } from "../pawnFormatter";
 import { parseSnippets, doCompletion, doCompletionResolve, doGoToDef, doHover, doSignHelp, resetAutocompletes } from "./parser";
 
 const useStdioTransport = process.argv.includes("--stdio");
@@ -93,9 +93,16 @@ connection.onDocumentFormatting(async (params: DocumentFormattingParams): Promis
 connection.onDocumentRangeFormatting(async (params: DocumentRangeFormattingParams): Promise<TextEdit[]> => {
   const document = documents.get(params.textDocument.uri);
   if (document === undefined) return [];
-  const text = document.getText(params.range);
-  const formatted = await formatPawn(text);
-  return [TextEdit.replace(params.range, formatted)];
+  const expanded = expandPawnFormatRange(document.getText(), {
+    start: document.offsetAt(params.range.start),
+    end: document.offsetAt(params.range.end),
+  });
+  const formatRange = {
+    start: document.positionAt(expanded.start),
+    end: document.positionAt(expanded.end),
+  };
+  const formatted = await formatPawn(document.getText(formatRange));
+  return [TextEdit.replace(formatRange, formatted)];
 });
 
 const SAMP_COLOR_PATTERN = /(?:\{([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})\}|\b0[xX]([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})\b)/g;

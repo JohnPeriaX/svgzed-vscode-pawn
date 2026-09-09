@@ -1,5 +1,6 @@
 import BuildTaskHandler, { runPawnBuild, selectPawnBuildTool, resetPawnBuildTool } from "./buildTask";
-import PawnDocumentFormattingEditProvider from "./formatter";
+import PawnDocumentFormattingEditProvider, { getBraceStyle } from "./formatter";
+import { expandPawnFormatRange, formatPawn } from "../pawnFormatter";
 import * as vscode from "vscode";
 import { initSnippetCollector } from "./commonFunc";
 import path = require("path");
@@ -52,6 +53,39 @@ class PawnColorProvider implements vscode.DocumentColorProvider {
 
 export let client: LanguageClient;
 
+let applyingPasteFormat = false;
+
+async function formatPastedPawnChange(change: vscode.TextDocumentChangeEvent) {
+  if (applyingPasteFormat || change.document.languageId !== "pawn") return;
+  if (!vscode.workspace.getConfiguration("pawn.format").get<boolean>("autoFormatOnPaste", true)) return;
+  if (change.contentChanges.length !== 1) return;
+
+  const edit = change.contentChanges[0];
+  if (!edit.text) return;
+  const looksLikeCodePaste = edit.text.includes("\n") || !edit.range.isEmpty;
+  if (!looksLikeCodePaste) return;
+
+  applyingPasteFormat = true;
+  try {
+    const clipboard = await vscode.env.clipboard.readText();
+    if (!clipboard || clipboard !== edit.text) return;
+
+    const start = change.document.offsetAt(edit.range.start);
+    const pastedEnd = start + edit.text.length;
+    const expanded = expandPawnFormatRange(change.document.getText(), { start, end: pastedEnd });
+    const formatRange = new vscode.Range(change.document.positionAt(expanded.start), change.document.positionAt(expanded.end));
+    const formatted = await formatPawn(change.document.getText(formatRange), getBraceStyle());
+    const current = change.document.getText(formatRange);
+    if (formatted === current) return;
+
+    const workspaceEdit = new vscode.WorkspaceEdit();
+    workspaceEdit.replace(change.document.uri, formatRange, formatted);
+    await vscode.workspace.applyEdit(workspaceEdit);
+  } finally {
+    applyingPasteFormat = false;
+  }
+}
+
 export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(vscode.commands.registerCommand("pawn-development.build", runPawnBuild));
   context.subscriptions.push(vscode.commands.registerCommand("pawn-development.selectBuildTool", selectPawnBuildTool));
@@ -71,7 +105,8 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.languages.registerColorProvider("pawn", new PawnColorProvider()));
   }
 
-  vscode.workspace.onDidChangeWorkspaceFolders(() => initSnippetCollector(true));
+  context.subscriptions.push(vscode.workspace.onDidChangeTextDocument((change) => void formatPastedPawnChange(change)));
+  context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(() => initSnippetCollector(true)));
   vscode.workspace.onDidRenameFiles(() => initSnippetCollector(true));
   vscode.workspace.onDidSaveTextDocument((e) => {
     if (path.basename(e.fileName) === ".pawnignore") initSnippetCollector(true);

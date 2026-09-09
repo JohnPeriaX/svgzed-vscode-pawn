@@ -2,7 +2,8 @@ use std::env;
 
 use zed_extension_api::{self as zed, DownloadedFileType, LanguageServerId, Result};
 
-const SERVER_URL_PREFIX: &str = "https://github.com/JohnPeriaX/svgzed-vscode-pawn/releases/download/";
+const SERVER_URL_PREFIX: &str =
+    "https://github.com/JohnPeriaX/svgzed-vscode-pawn/releases/download/";
 const SERVER_FILE: &str = "pawn-language-server.js";
 const ASTYLE_WASM_FILE: &str = "libastyle.wasm";
 struct PawnExtension;
@@ -33,7 +34,10 @@ impl zed::Extension for PawnExtension {
             if server_path.exists() && wasm_path.exists() {
                 return Ok(zed::Command {
                     command: zed::node_binary_path()?,
-                    args: vec![server_path.to_string_lossy().into_owned(), "--stdio".to_string()],
+                    args: vec![
+                        server_path.to_string_lossy().into_owned(),
+                        "--stdio".to_string(),
+                    ],
                     env: Default::default(),
                 });
             }
@@ -48,12 +52,19 @@ impl zed::Extension for PawnExtension {
             zed::download_file(&server_url, SERVER_FILE, DownloadedFileType::Uncompressed)?;
         }
         if !wasm_path.exists() {
-            zed::download_file(&astyle_wasm_url, ASTYLE_WASM_FILE, DownloadedFileType::Uncompressed)?;
+            zed::download_file(
+                &astyle_wasm_url,
+                ASTYLE_WASM_FILE,
+                DownloadedFileType::Uncompressed,
+            )?;
         }
 
         Ok(zed::Command {
             command: zed::node_binary_path()?,
-            args: vec![server_path.to_string_lossy().into_owned(), "--stdio".to_string()],
+            args: vec![
+                server_path.to_string_lossy().into_owned(),
+                "--stdio".to_string(),
+            ],
             env: Default::default(),
         })
     }

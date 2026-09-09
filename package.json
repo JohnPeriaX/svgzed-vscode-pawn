@@ -50,6 +50,7 @@
     "watch": "tsc -watch -p ./",
     "test": "npm run compile && node ./node_modules/vscode/bin/test",
     "test:encoding": "npm run compile && node --test tests/encoding.test.js tests/whatwg-complete.test.js",
+    "test:formatter": "npm run compile && node --test tests/formatter.test.js tests/paste-formatter-regression.test.js tests/lsp-format-smoke.js tests/package-format.cjs && node tests/customer-format-gate.cjs",
     "publish": "vsce publish minor"
   },
   "dependencies": {
@@ -183,7 +184,7 @@
       "properties": {
         "pawn.language.brace_style": {
           "type": "string",
-          "default": "Allman",
+          "default": "K&R",
           "description": "Format your code with chosen brace-style",
           "enum": [
             "Allman",
@@ -250,6 +251,11 @@
             "windows-1251"
           ],
           "description": "Target legacy encoding used for UTF-8 Pawn source during build. Legacy files are preserved unchanged."
+        },
+        "pawn.format.autoFormatOnPaste": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically format Pawn code after pasted text replaces or inserts code."
         },
         "pawn.build.tool": {
           "type": "string",
