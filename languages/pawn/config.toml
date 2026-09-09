@@ -6,6 +6,10 @@ block_comment = ["/*", "*/"]
 tab_size = 4
 hard_tabs = false
 
+# Pawn/SA-MP indentation: open braces increase indentation, closing braces decrease it.
+increase_indent_pattern = "^.*\\{[^\\}]*$"
+decrease_indent_pattern = "^\\s*\\}.*$"
+
 brackets = [
   { start = "{", end = "}", close = true, newline = true },
   { start = "[", end = "]", close = true, newline = false },

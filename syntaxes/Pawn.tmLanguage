@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
@@ -703,7 +703,7 @@
 				<dict>
 					<key>begin</key> <string>(?ix)
 					    (?= (?-i: @[a-zA-Z_]++ | \b [A-Z_]++) \b) @? \b (?:
-					        (NOTE) | (NB) | (CHANGED) | (IDEA) | (IMPORTANT) | (HACK) | (BUG)
+					        (NOTE) | (NB) | (CHANGED) | (IDEA) | (IMPORTANT) | (HACK) | (BUG) | (DONE)
 					    ) \b
 					</string>
 					<key>beginCaptures</key>
@@ -716,6 +716,7 @@
 						<key>5</key> <dict> <key>name</key> <string>storage.type.class.important.c</string> </dict>
 						<key>6</key> <dict> <key>name</key> <string>storage.type.class.hack.c</string> </dict>
 						<key>7</key> <dict> <key>name</key> <string>storage.type.class.bug.c</string> </dict>
+						<key>8</key> <dict> <key>name</key> <string>storage.type.class.done.c</string> </dict>
 					</dict>
 					<key>end</key> <string>(?=[\s/*]*\*/)|(?&lt;=$\n)</string>
 					<key>name</key> <string>meta.toc-list.task-tag.note.c</string>
@@ -762,6 +763,7 @@
 				<dict> <key>include</key> <string>#comments</string> </dict>
 				<dict> <key>include</key> <string>#lex-continuation</string> </dict>
 				<dict> <key>include</key> <string>#lex-newline</string> </dict>
+				<dict> <key>include</key> <string>#pawn-samp-hex-color</string> </dict>
 				<dict> <key>include</key> <string>#lex-number</string> </dict>
 				<dict> <key>include</key> <string>#lex-string</string> </dict>
 			</array>
@@ -920,6 +922,11 @@
 					</dict>
 				</dict>
 			</array>
+		</dict>
+		<key>pawn-samp-hex-color</key>
+		<dict>
+			<key>match</key> <string>\\b0x[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?\\b</string>
+			<key>name</key> <string>constant.other.color.samp.pawn</string>
 		</dict>
 		<key>lex-number</key>
 		<dict>
@@ -1164,6 +1171,10 @@
 					<key>name</key> <string>string.quoted.double.c</string>
 					<key>patterns</key>
 					<array>
+						<dict>
+							<key>match</key> <string>\{[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?\}</string>
+							<key>name</key> <string>constant.other.color.samp.pawn</string>
+						</dict>
 						<dict> <key>include</key> <string>#lex-continuation</string> </dict>
 						<dict> <key>include</key> <string>#string_escaped_char</string> </dict>
 						<dict> <key>include</key> <string>#string_placeholder</string> </dict>

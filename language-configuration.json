@@ -47,6 +47,10 @@
         ]
     ],
     // symbols that that can be used to surround a selection
+    "indentationRules": {
+        "increaseIndentPattern": "^\s*(?:(?:if|else|for|while|switch|do|case|default|public|stock|forward|native|hook|task|ptask|function|func)\\b[^;{}]*\\{[^{}]*$|[^{}]*\\{[^{}]*$)",
+        "decreaseIndentPattern": "^\s*\\}.*$"
+    },
     "surroundingPairs": [
         [
             "{",

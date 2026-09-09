@@ -90,6 +90,25 @@
         "path": "./syntaxes/Pawn.tmLanguage"
       }
     ],
+    "configurationDefaults": {
+      "[pawn]": {
+        "editor.tokenColorCustomizations": {
+          "textMateRules": [
+            { "scope": "storage.type.class.todo.c", "settings": { "foreground": "#DCDCAA", "fontStyle": "bold" } },
+            { "scope": "storage.type.class.fixme.c", "settings": { "foreground": "#F44747", "fontStyle": "bold" } },
+            { "scope": "storage.type.class.xxx.c", "settings": { "foreground": "#F44747", "fontStyle": "bold" } },
+            { "scope": "storage.type.class.wtf.c", "settings": { "foreground": "#F44747", "fontStyle": "bold" } },
+            { "scope": "storage.type.class.bug.c", "settings": { "foreground": "#F44747", "fontStyle": "bold" } },
+            { "scope": "storage.type.class.review.c", "settings": { "foreground": "#D7BA7D", "fontStyle": "bold" } },
+            { "scope": "storage.type.class.hack.c", "settings": { "foreground": "#D7BA7D", "fontStyle": "bold" } },
+            { "scope": "storage.type.class.note.c", "settings": { "foreground": "#4FC1FF", "fontStyle": "bold" } },
+            { "scope": "storage.type.class.nb.c", "settings": { "foreground": "#4FC1FF", "fontStyle": "bold" } },
+            { "scope": "storage.type.class.idea.c", "settings": { "foreground": "#C586C0", "fontStyle": "bold" } },
+            { "scope": "storage.type.class.done.c", "settings": { "foreground": "#6A9955", "fontStyle": "bold" } }
+          ]
+        }
+      }
+    },
     "configuration": {
       "id": "pawn",
       "type": "object",
@@ -135,6 +154,11 @@
           "type": "boolean",
           "default": "true",
           "description": "Allow to collect #defineSnip for auto completion"
+        },
+        "pawn.language.enableSampColorPicker": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable SA-MP {RRGGBB}/{RRGGBBAA} color decorators in VS Code."
         },
         "pawn.language.startRegion": {
           "type": "string",

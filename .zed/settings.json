@@ -13,7 +13,8 @@
   "languages": {
     "Pawn": {
       "format_on_save": "off",
-      "enable_language_server": false,
+      "enable_language_server": true,
+      "lsp_document_colors": "background",
       "remove_trailing_whitespace_on_save": false,
       "ensure_final_newline_on_save": false
     },

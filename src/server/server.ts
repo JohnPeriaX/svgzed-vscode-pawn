@@ -12,45 +12,22 @@ import {
   CompletionParams,
   DocumentFormattingParams,
   DocumentRangeFormattingParams,
+  DocumentColorParams,
+  ColorInformation,
   TextEdit,
 } from "vscode-languageserver/node";
 
-import { format } from "astyle";
 import { TextDocument } from "vscode-languageserver-textdocument";
+import { formatPawn } from "../pawnFormatter";
 import { parseSnippets, doCompletion, doCompletionResolve, doGoToDef, doHover, doSignHelp, resetAutocompletes } from "./parser";
 
-export const connection = createConnection(ProposedFeatures.all);
+const useStdioTransport = process.argv.includes("--stdio");
+export const connection = useStdioTransport
+  ? createConnection(ProposedFeatures.all, process.stdin, process.stdout)
+  : createConnection(ProposedFeatures.all);
 export const documents = new TextDocuments(TextDocument);
 documents.listen(connection);
 connection.listen();
-
-const formatPawn = async (content: string) => {
-  const beforeFix = [
-    [/\f|\v|\t*(new|static|const)\s*\n\s*((.|\s)*?)\s*;/gm, "$1 $2;"],
-    [/case\s*(\S*)\s*:\s*(\w+\s*.*;)/gm, "case $1pawnd_switch_case_signle_line$2"],
-    [/([^\s:]):([^\s:])(?=(?:[^"]*"[^"]*")*[^"]*$)/gm, "$1pawnd_tag_semicolon$2"],
-    [/([^\s:])::([^\s:])(?=(?:[^"]*"[^"]*")*[^"]*$)/gm, "$1pawnd_tag_two_semicolon$2"],
-    [/([^\s:])@([^\s:])(?=(?:[^"]*"[^"]*")*[^"]*$)/gm, "$1pawnd_tag_at$2"],
-  ] as const;
-  for (const [expr, replacement] of beforeFix) content = content.replace(expr, replacement);
-
-  content = await format(content, [
-    "--style=allman", "--indent-switches", "--indent-preproc-define",
-    "--indent-col1-comments", "--indent-preproc-block", "--indent-after-parens",
-    "--pad-comma", "--pad-oper", "--unpad-paren", "--pad-header", "--attach-return-type",
-  ].join(" "));
-
-  const afterFix = [
-    [/case(.*)pawnd_switch_case_signle_line/gm, "case$1: "],
-    [/pawnd_tag_semicolon/gm, ":"],
-    [/pawnd_tag_two_semicolon/gm, "::"],
-    [/pawnd_tag_at/gm, "@"],
-    [/static(\s+)const/gm, "static const"],
-    [/\.\s\./gm, ".."],
-  ] as const;
-  for (const [expr, replacement] of afterFix) content = content.replace(expr, replacement);
-  return content;
-};
 
 connection.onInitialize(() => ({
   capabilities: {
@@ -61,6 +38,7 @@ connection.onInitialize(() => ({
     signatureHelpProvider: { triggerCharacters: ["(", ","] },
     documentFormattingProvider: true,
     documentRangeFormattingProvider: true,
+    colorProvider: true,
     workspace: { workspaceFolders: { supported: true } },
   },
 }));
@@ -118,4 +96,34 @@ connection.onDocumentRangeFormatting(async (params: DocumentRangeFormattingParam
   const text = document.getText(params.range);
   const formatted = await formatPawn(text);
   return [TextEdit.replace(params.range, formatted)];
+});
+
+const SAMP_COLOR_PATTERN = /(?:\{([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})\}|\b0[xX]([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})\b)/g;
+
+connection.onDocumentColor(async (params: DocumentColorParams): Promise<ColorInformation[]> => {
+  const document = documents.get(params.textDocument.uri);
+  if (document === undefined) return [];
+
+  const colors: ColorInformation[] = [];
+  const lines = document.getText().split(/\r?\n/);
+  for (let line = 0; line < lines.length; line++) {
+    const text = lines[line];
+    SAMP_COLOR_PATTERN.lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = SAMP_COLOR_PATTERN.exec(text)) !== null) {
+      const hex = match[1] ?? match[2];
+      const red = parseInt(hex.slice(0, 2), 16) / 255;
+      const green = parseInt(hex.slice(2, 4), 16) / 255;
+      const blue = parseInt(hex.slice(4, 6), 16) / 255;
+      const alpha = hex.length === 8 ? parseInt(hex.slice(6, 8), 16) / 255 : 1;
+      colors.push({
+        range: {
+          start: { line, character: match.index },
+          end: { line, character: match.index + match[0].length },
+        },
+        color: { red, green, blue, alpha },
+      });
+    }
+  }
+  return colors;
 });

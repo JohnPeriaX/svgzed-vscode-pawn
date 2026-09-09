@@ -7,6 +7,49 @@ import { LanguageClient, LanguageClientOptions, ServerOptions, State, TransportK
 import { addToPawnIgnore, InitPawnIgnore } from "./whitelistedpaths";
 import PawnFoldingProvider from "./FoldingProvider";
 
+const SAMP_COLOR_PATTERNS = [
+  /\{([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})\}/g,
+  /\b0[xX]([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})\b/g,
+];
+
+class PawnColorProvider implements vscode.DocumentColorProvider {
+  provideDocumentColors(document: vscode.TextDocument): vscode.ColorInformation[] {
+    const colors: vscode.ColorInformation[] = [];
+    for (let line = 0; line < document.lineCount; line++) {
+      const text = document.lineAt(line).text;
+      for (const pattern of SAMP_COLOR_PATTERNS) {
+        pattern.lastIndex = 0;
+        let match: RegExpExecArray | null;
+        while ((match = pattern.exec(text)) !== null) {
+          const hex = match[1];
+          const rgb = hex.slice(0, 6);
+          const alpha = hex.length === 8 ? parseInt(hex.slice(6, 8), 16) / 255 : 1;
+          const color = new vscode.Color(
+            parseInt(rgb.slice(0, 2), 16) / 255,
+            parseInt(rgb.slice(2, 4), 16) / 255,
+            parseInt(rgb.slice(4, 6), 16) / 255,
+            alpha
+          );
+          const start = new vscode.Position(line, match.index);
+          const end = new vscode.Position(line, match.index + match[0].length);
+          colors.push(new vscode.ColorInformation(new vscode.Range(start, end), color));
+        }
+      }
+    }
+    return colors;
+  }
+
+  provideColorPresentations(color: vscode.Color): vscode.ColorPresentation[] {
+    const toHex = (value: number) => Math.round(value * 255).toString(16).padStart(2, "0").toUpperCase();
+    const r = toHex(color.red);
+    const g = toHex(color.green);
+    const b = toHex(color.blue);
+    const a = toHex(color.alpha);
+    const text = color.alpha < 1 ? `{${r}${g}${b}${a}}` : `{${r}${g}${b}}`;
+    return [new vscode.ColorPresentation(text)];
+  }
+}
+
 export let client: LanguageClient;
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -24,6 +67,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(vscode.languages.registerDocumentFormattingEditProvider("pawn", PawnDocumentFormattingEditProvider));
   context.subscriptions.push(vscode.languages.registerDocumentRangeFormattingEditProvider("pawn", PawnDocumentFormattingEditProvider));
+  if (vscode.workspace.getConfiguration("pawn.language").get<boolean>("enableSampColorPicker", true)) {
+    context.subscriptions.push(vscode.languages.registerColorProvider("pawn", new PawnColorProvider()));
+  }
 
   vscode.workspace.onDidChangeWorkspaceFolders(() => initSnippetCollector(true));
   vscode.workspace.onDidRenameFiles(() => initSnippetCollector(true));
