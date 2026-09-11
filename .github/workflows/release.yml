@@ -36,6 +36,9 @@ jobs:
           npx esbuild src/server/server.ts --bundle --platform=node --target=node18 --outfile=dist/zed-pawn/pawn-language-server.js
           cp node_modules/astyle/dist/libastyle.wasm dist/zed-pawn/libastyle.wasm
 
+      - name: Smoke test Pawn language server (Zed bundle)
+        run: node tools/zed-bundle-smoke.cjs
+
       - name: Build VS Code extension
         run: npx @vscode/vsce package --no-dependencies --no-yarn --out release/pawn-development-1.1.5.vsix
 
