@@ -2,7 +2,7 @@
   "name": "pawn-development",
   "displayName": "Pawn Forge",
   "description": "Modern Pawn development tools for SA-MP and open.mp, with formatting, diagnostics, encoding support, and language tooling.",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "publisher": "pawnforge",
   "engines": {
     "vscode": "^1.30.0"
