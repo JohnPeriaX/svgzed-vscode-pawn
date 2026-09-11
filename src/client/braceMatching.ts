@@ -5,6 +5,15 @@ let matchDecoration: vscode.TextEditorDecorationType | undefined;
 let errorDecoration: vscode.TextEditorDecorationType | undefined;
 const scanCache = new Map<string, { version: number; scan: ReturnType<typeof scanPawnBraces> }>();
 
+function getScan(document: vscode.TextDocument) {
+  const key = document.uri.toString();
+  const cached = scanCache.get(key);
+  if (cached && cached.version === document.version) return cached.scan;
+  const scan = scanPawnBraces(document.getText());
+  scanCache.set(key, { version: document.version, scan });
+  return scan;
+}
+
 function ensureDecorations() {
   matchDecoration ??= vscode.window.createTextEditorDecorationType({
     backgroundColor: new vscode.ThemeColor("editor.wordHighlightBackground"),
