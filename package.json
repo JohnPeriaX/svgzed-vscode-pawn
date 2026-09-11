@@ -50,7 +50,7 @@
     "watch": "tsc -watch -p ./",
     "test": "npm run compile && node ./node_modules/vscode/bin/test",
     "test:encoding": "npm run compile && node --test tests/encoding.test.js tests/whatwg-complete.test.js",
-    "test:formatter": "npm run compile && node --test tests/formatter.test.js tests/paste-formatter-regression.test.js tests/brace-matching.test.js tests/lsp-format-smoke.js tests/package-format.cjs && node tests/customer-format-gate.cjs",
+    "test:formatter": "npm run compile && node --test tests/formatter.test.js tests/paste-formatter-regression.test.js tests/brace-matching.test.js tests/lsp-format-smoke.js tests/package-format.cjs && node tests/customer-format-gate.cjs && node tools/zed-bundle-smoke.cjs",
     "publish": "vsce publish minor"
   },
   "dependencies": {
