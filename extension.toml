@@ -1,8 +1,8 @@
 id = "pawn"
-name = "Pawn"
+name = "Pawn Forge"
 version = "0.1.21"
 schema_version = 1
-authors = ["Pawn Zed Contributors"]
+authors = ["Pawn Forge Contributors"]
 description = "Pawn language support for Zed, focused on SA-MP and open.mp development."
 repository = "https://github.com/JohnPeriaX/svgzed-vscode-pawn"
 

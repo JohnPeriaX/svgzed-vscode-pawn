@@ -1,19 +1,18 @@
 {
   "name": "pawn-development",
-  "displayName": "Pawn Development Tool",
-  "description": "Pawn development tool for open.mp and SA:MP",
+  "displayName": "Pawn Forge",
+  "description": "Modern Pawn development tools for SA-MP and open.mp, with formatting, diagnostics, encoding support, and language tooling.",
   "version": "1.1.5",
-  "publisher": "openmp",
+  "publisher": "pawnforge",
   "engines": {
     "vscode": "^1.30.0"
   },
   "bugs": {
-    "url": "https://github.com/openmultiplayer/vscode-pawn/issues",
-    "email": "reach@amii.ir"
+    "url": "https://github.com/JohnPeriaX/svgzed-vscode-pawn/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/openmultiplayer/vscode-pawn.git"
+    "url": "https://github.com/JohnPeriaX/svgzed-vscode-pawn.git"
   },
   "icon": "icon.png",
   "categories": [
@@ -51,7 +50,7 @@
     "test": "npm run compile && node ./node_modules/vscode/bin/test",
     "test:encoding": "npm run compile && node --test tests/encoding.test.js tests/whatwg-complete.test.js",
     "test:formatter": "npm run compile && node --test tests/formatter.test.js tests/paste-formatter-regression.test.js tests/brace-matching.test.js tests/lsp-format-smoke.js tests/package-format.cjs && node tests/customer-format-gate.cjs",
-    "publish": "vsce publish minor"
+    "publish": "vsce publish"
   },
   "dependencies": {
     "@types/vscode": "^1.70.0",
