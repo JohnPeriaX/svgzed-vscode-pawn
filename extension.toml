@@ -1,6 +1,6 @@
 id = "pawn"
 name = "Pawn"
-version = "0.1.16"
+version = "0.1.17"
 schema_version = 1
 authors = ["Pawn Zed Contributors"]
 description = "Pawn language support for Zed, focused on SA-MP and open.mp development."

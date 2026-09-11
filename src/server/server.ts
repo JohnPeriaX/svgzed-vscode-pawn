@@ -27,6 +27,7 @@ import { scanPawnBraces } from "../braceScanner";
 import { parseSnippets, doCompletion, doCompletionResolve, doGoToDef, doHover, doSignHelp, resetAutocompletes } from "./parser";
 
 const useStdioTransport = process.argv.includes("--stdio");
+const braceScanCache = new Map<string, { version: number; scan: ReturnType<typeof scanPawnBraces> }>();
 export const connection = useStdioTransport
   ? createConnection(ProposedFeatures.all, process.stdin, process.stdout)
   : createConnection(ProposedFeatures.all);
@@ -55,7 +56,9 @@ function pawnPosition(document: TextDocument, offset: number) {
 
 function braceDiagnostics(document: TextDocument): Diagnostic[] {
   const text = document.getText();
-  const scan = scanPawnBraces(text);
+  const cached = braceScanCache.get(document.uri);
+  const scan = cached && cached.version === document.version ? cached.scan : scanPawnBraces(text);
+  if (!cached || cached.version !== document.version) braceScanCache.set(document.uri, { version: document.version, scan });
   return scan.unmatched.map((item) => ({
     severity: DiagnosticSeverity.Error,
     range: { start: pawnPosition(document, item.offset), end: pawnPosition(document, item.offset + 1) },
@@ -70,7 +73,9 @@ connection.onDocumentHighlight((params: DocumentHighlightParams): DocumentHighli
   if (document === undefined) return [];
   const text = document.getText();
   const offset = document.offsetAt(params.position);
-  const scan = scanPawnBraces(text);
+  const cached = braceScanCache.get(document.uri);
+  const scan = cached && cached.version === document.version ? cached.scan : scanPawnBraces(text);
+  if (!cached || cached.version !== document.version) braceScanCache.set(document.uri, { version: document.version, scan });
   const pair = scan.pairAt(offset === text.length ? offset - 1 : offset);
   if (!pair) return [];
   return [
@@ -91,8 +96,8 @@ connection.onDidChangeConfiguration(() => {
   documents.all().forEach((doc) => parseSnippets(doc));
 });
 
-documents.onDidOpen((change) => publishBraceDiagnostics(change.document));
-documents.onDidChangeContent((change) => { parseSnippets(change.document, false); publishBraceDiagnostics(change.document); });
+documents.onDidOpen((change) => { braceScanCache.delete(change.document.uri); publishBraceDiagnostics(change.document); });
+documents.onDidChangeContent((change) => { braceScanCache.delete(change.document.uri); parseSnippets(change.document, false); publishBraceDiagnostics(change.document); });
 documents.onDidSave((change) => { parseSnippets(change.document); publishBraceDiagnostics(change.document); });
 
 connection.onDefinition((params: DefinitionParams) => {

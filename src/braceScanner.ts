@@ -27,6 +27,7 @@ function charLiteralEnd(text: string, start: number): number {
 export function scanPawnBraces(text: string): PawnBraceScan {
   const stack: number[] = [];
   const pairs: PawnBracePair[] = [];
+  const pairByOffset = new Map<number, PawnBracePair>();
   const unmatched: PawnUnmatchedBrace[] = [];
   let state: "code" | "lineComment" | "blockComment" | "string" = "code";
   let escaped = false;
@@ -55,13 +56,13 @@ export function scanPawnBraces(text: string): PawnBraceScan {
     if (ch === "{") stack.push(i);
     else if (ch === "}") {
       if (stack.length === 0) unmatched.push({ kind: "close", offset: i });
-      else pairs.push({ open: stack.pop()!, close: i });
+      else { const pair = { open: stack.pop()!, close: i }; pairs.push(pair); pairByOffset.set(pair.open, pair); pairByOffset.set(pair.close, pair); }
     }
   }
 
   while (stack.length) unmatched.push({ kind: "open", offset: stack.pop()! });
   pairs.sort((a, b) => a.open - b.open);
   unmatched.sort((a, b) => a.offset - b.offset);
-  const pairAt = (offset: number) => pairs.find((pair) => pair.open === offset || pair.close === offset);
+  const pairAt = (offset: number) => pairByOffset.get(offset);
   return { pairs, unmatched, pairAt };
 }

@@ -3,6 +3,7 @@ import { scanPawnBraces, PawnBracePair } from "../braceScanner";
 
 let matchDecoration: vscode.TextEditorDecorationType | undefined;
 let errorDecoration: vscode.TextEditorDecorationType | undefined;
+const scanCache = new Map<string, { version: number; scan: ReturnType<typeof scanPawnBraces> }>();
 
 function ensureDecorations() {
   matchDecoration ??= vscode.window.createTextEditorDecorationType({
@@ -27,13 +28,13 @@ function positionAt(text: string, offset: number): vscode.Position {
   return new vscode.Position(line, character);
 }
 
-function braceRange(text: string, offset: number): vscode.Range {
-  const start = positionAt(text, offset);
+function braceRange(document: vscode.TextDocument, offset: number): vscode.Range {
+  const start = document.positionAt(offset);
   return new vscode.Range(start, new vscode.Position(start.line, start.character + 1));
 }
 
-function diagnosticFor(text: string, unmatched: { kind: "open" | "close"; offset: number }): vscode.Diagnostic {
-  const range = braceRange(text, unmatched.offset);
+function diagnosticFor(document: vscode.TextDocument, unmatched: { kind: "open" | "close"; offset: number }): vscode.Diagnostic {
+  const range = braceRange(document, unmatched.offset);
   const missing = unmatched.kind === "open" ? "}" : "{";
   const message = unmatched.kind === "open"
     ? `Unmatched { at this position. Expected closing }.`
@@ -49,17 +50,20 @@ export function registerPawnBraceMatching(context: vscode.ExtensionContext): vsc
   const refresh = (editor: vscode.TextEditor | undefined) => {
     if (!editor || editor.document.languageId !== "pawn") return;
     const text = editor.document.getText();
-    const scan = scanPawnBraces(text);
+    const key = editor.document.uri.toString();
+    const cached = scanCache.get(key);
+    const scan = cached && cached.version === editor.document.version ? cached.scan : scanPawnBraces(text);
+    if (!cached || cached.version !== editor.document.version) scanCache.set(key, { version: editor.document.version, scan });
     const cursor = editor.selection.active;
     const offset = editor.document.offsetAt(cursor);
     const pair = scan.pairAt(offset === text.length ? offset - 1 : offset);
     const ranges: vscode.Range[] = [];
     if (pair) {
-      ranges.push(braceRange(text, pair.open), braceRange(text, pair.close));
+      ranges.push(braceRange(editor.document, pair.open), braceRange(editor.document, pair.close));
     }
     editor.setDecorations(matchDecoration!, ranges);
-    editor.setDecorations(errorDecoration!, scan.unmatched.map((item) => braceRange(text, item.offset)));
-    diagnostics.set(editor.document.uri, scan.unmatched.map((item) => diagnosticFor(text, item)));
+    editor.setDecorations(errorDecoration!, scan.unmatched.map((item) => braceRange(editor.document, item.offset)));
+    diagnostics.set(editor.document.uri, scan.unmatched.map((item) => diagnosticFor(editor.document, item)));
   };
 
   const disposables = [
@@ -67,7 +71,10 @@ export function registerPawnBraceMatching(context: vscode.ExtensionContext): vsc
     vscode.window.onDidChangeActiveTextEditor(refresh),
     vscode.window.onDidChangeTextEditorSelection((event) => refresh(event.textEditor)),
     vscode.workspace.onDidChangeTextDocument((event) => {
-      if (event.document.languageId === "pawn") refresh(vscode.window.visibleTextEditors.find((e) => e.document === event.document));
+      if (event.document.languageId === "pawn") {
+        scanCache.delete(event.document.uri.toString());
+        refresh(vscode.window.visibleTextEditors.find((e) => e.document === event.document));
+      }
     }),
     matchDecoration!,
     errorDecoration!,
